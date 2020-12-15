@@ -1,0 +1,812 @@
+
+/*
+
+	CONSTRAINT TEST FILE
+		-Contains commands for testing the constraints
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+
+--@D:\Database_Assignment_II\script\constraint_test_4.txt
+
+--------------------------------------------STAFF TABLE-------------------------------------------------
+
+------------------------------TEST FOR PRIMARY KEY CONSTRAINT-------------------------------
+
+-- BEFORE ASSIGNING PRIMARY KEY TO STAFF TABLE
+
+-- CHECKING ALREADY INSERTED ROWS IN staff
+
+SELECT staff_id,firstname FROM staff;
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname)
+VALUES (1, 'BISHOWNATH');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+
+-- AFTER ASSIGNING PRIMARY KEY TO STAFF TABLE
+
+
+-- CREATING PRIMARY KEY FOR STAFF TABLE
+
+ALTER TABLE staff
+ADD CONSTRAINT pk_staff
+PRIMARY KEY (staff_id);
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname)
+VALUES (1, 'BISHOWNATH');
+
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- unique constraint (CSY2038B4.PK_STAFF) violated
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+-- OUTPUT
+-- 1 ROW DELETED
+
+SELECT staff_id FROM staff;
+--OUTPUT 
+-- NO ROW SELECTED.
+
+
+
+
+
+------------------------------TEST FOR CHECK CONSTRAINT ON GENDER COLUMN ('M/F')-------------------------------
+
+
+
+-- BEFORE ASSIGNING CHECK CONSTRAINT TO STAFF TABLE
+
+-- CHECKING ALREADY INSERTED ROWS IN staff
+
+SELECT staff_id,firstname FROM staff;
+
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname,gender)
+VALUES (1, 'BISHOWNATH','O');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+-- AFTER ASSIGNING CHECK CONSTRAINT TO STAFF TABLE
+
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_gender
+CHECK (gender IN('M', 'F'));
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname,gender)
+VALUES (1, 'BISHOWNATH','O');
+
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+--check constraint (CSY2038B4.CK_STAFF_GENDER) violated
+
+
+-- TRYING TO INSERT CORRECT DATA IN staff Table
+DELETE FROM staff;
+INSERT INTO staff (staff_id,firstname,gender)
+VALUES (1, 'BISHOWNATH','M');
+
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+-- OUTPUT
+-- 1 ROW DELETED
+
+SELECT staff_id FROM staff;
+--OUTPUT 
+-- NO ROW SELECTED.
+
+
+
+
+------------------------------TEST FOR CHECK CONSTRAINT ON FIRSTNAME/LASTNAME COLUMN ('M/F')-------------------------------
+
+
+
+-- BEFORE ASSIGNING CHECK CONSTRAINT TO STAFF TABLE
+
+-- CHECKING ALREADY INSERTED ROWS IN staff
+
+SELECT staff_id,firstname,lastname FROM staff;
+
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname,lastname)
+VALUES (1, 'BISHOWNATH','dhakal');
+
+INSERT INTO staff (staff_id,firstname,lastname)
+VALUES (2, 'sandeep','SHUBBA');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+
+
+-- AFTER ASSIGNING CHECK CONSTRAINT TO STAFF TABLE
+
+-- CONSTRAINT FOR FIRSTNAME COLUMN
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_firstname
+CHECK (firstname= UPPER(firstname));
+
+
+--CONSTRAINT ON LASTNAME COLUMN
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_lastname
+CHECK (lastname= UPPER(lastname));
+
+
+
+INSERT INTO staff (staff_id,firstname,lastname)
+VALUES (1, 'BISHOWNATH','dhakal');
+
+INSERT INTO staff (staff_id,firstname,lastname)
+VALUES (2, 'sandeep','SHUBBA');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- check constraint (CSY2038B4.CK_STAFF_LASTNAME) violated
+-- check constraint (CSY2038B4.CK_STAFF_FIRSTNAME) violated
+
+-- INSERTING VALID DATA INTO THE TABLE STAFF
+
+
+INSERT INTO staff (staff_id,firstname,lastname)
+VALUES (1, 'BISHOWNATH','DHAKAL');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- 1 ROW CREATED
+
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+-- OUTPUT
+-- 1 ROW DELETED
+
+SELECT staff_id FROM staff;
+--OUTPUT 
+-- NO ROW SELECTED.
+
+
+
+
+
+------------------------------TEST FOR FOREIGN KEY CONSTRAINT-------------------------------
+
+-- BEFORE ASSIGNING FOREIGN KEY TO STAFF TABLE
+
+-- CHECKING ALREADY INSERTED ROWS IN staff
+
+SELECT staff_id,firstname,leader FROM staff;
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname,leader)
+VALUES (1, 'BISHOWNATH',2);
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+
+-- AFTER ASSIGNING FOREIGN KEY TO STAFF TABLE
+
+ALTER TABLE staff
+ADD CONSTRAINT fk_s_staff
+FOREIGN KEY (leader)
+REFERENCES staff(staff_id);
+
+
+-- TRYING TO INSERT IN staff Table
+
+INSERT INTO staff (staff_id,firstname,leader)
+VALUES (1, 'BISHOWNATH',2);
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+--ORA-02291: integrity constraint (CSY2038B4.FK_S_STAFF) violated - parent key
+
+
+-- INSERTING VALID DATA IN staff table
+
+INSERT INTO staff (staff_id,firstname,leader)
+VALUES (1, 'BISHOWNATH',1);
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+
+-- REMOVING THE DATA INSERTED
+
+DELETE FROM staff;
+
+-- OUTPUT
+-- 1 ROW DELETED
+
+SELECT staff_id FROM staff;
+--OUTPUT 
+-- NO ROW SELECTED.
+
+
+
+
+
+
+
+
+--------------------------------------------FESTIVAL_NATURES TABLE-------------------------------------------------
+
+------------------------------TEST FOR PRIMARY KEY CONSTRAINT-------------------------------
+
+
+
+-- BEFORE ASSIGNING PRIMARY KEY TO FESTIVAL_NATURES TABLE
+
+-- CHECKING ALREADY INSERTED ROWS IN FESTIVAL_NATURES
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- TRYING TO INSERT IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name)
+VALUES (1, 'CONCERT');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+
+-- AFTER ASSIGNING PRIMARY KEY TO FESTIVAL_NATURES TABLE
+
+
+-- CREATING PRIMARY KEY FOR FESTIVAL_NATURES TABLE
+
+ALTER TABLE festival_natures 
+ADD CONSTRAINT pk_festival_natures
+PRIMARY KEY (festival_nature_id);
+
+-- TRYING TO INSERT IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name)
+VALUES (1, 'CONCERT');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ORA-00001: unique constraint (CSY2038B4.PK_FESTIVAL_NATURES) violated
+
+
+-- TRYING TO INSERT VALID DATA IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name)
+VALUES (2, 'CHILDREN FAIR');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- DELETING ALL INSERTED DATA FROM FESTIVAL_NATURES TABLE
+
+DELETE FROM festival_natures;
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+
+------------------------------TEST FOR CHECK CONSTRAINT ON DIFFERENT COLUMNS-------------------------------
+
+-- BEFORE ASSIGNING CHECK CONSTRAINTS TO festival_natures table
+
+
+-- CHECKING ALREADY INSERTED ROWS IN FESTIVAL_NATURES
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- TRYING TO INSERT IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name,target_audience)
+VALUES (1, 'CONCERT','adult');
+
+INSERT INTO festival_natures(festival_nature_id,name,target_audience)
+VALUES (2, 'children fair','CHILDREN');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- DELETEING RECENTLY ADDED DATA
+
+DELETE FROM festival_natures;
+
+-- AFTER ASSIGNING CHECK CONSTRAINTS TO festival_natures table
+
+-- CREATING CHECK CONSTRAINTS FOR FESTIVAL_NATURES TABLE
+
+--CONSTRAINT FOR NAME COLUMN
+ALTER TABLE festival_natures 
+ADD CONSTRAINT ck_festival_natures_name
+CHECK (name= UPPER(name));
+
+--CONSTRAINT FOR TARGET_AUDIENCE COLUMN
+ALTER TABLE festival_natures 
+ADD CONSTRAINT ck_festival_natures_taudience
+CHECK (target_audience= UPPER(target_audience));
+
+
+-- TRYING TO INSERT IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name,target_audience)
+VALUES (1, 'CONCERT','adult');
+
+INSERT INTO festival_natures(festival_nature_id,name,target_audience)
+VALUES (2, 'children fair','CHILDREN');
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ORA-02290: check constraint (CSY2038B4.CK_FESTIVAL_NATURES_NAME) violated
+--ORA-02290: check constraint (CSY2038B4.CK_FESTIVAL_NATURES_TAUDIENCE) violated
+
+-- TRYING TO INSERT VALID DATA IN FESTIVAL_NATURES Table
+
+INSERT INTO festival_natures(festival_nature_id,name,target_audience)
+VALUES (1, 'CONCERT','ADULT');
+
+
+-- EXPECTED OUTPUT / ACTUAL OUTPUT 
+-- ROW INSERTED SUCESSFULLY.
+
+-- DELETING ALL INSERTED DATA FROM FESTIVAL_NATURES TABLE
+
+DELETE FROM festival_natures;
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+
+
+
+
+--------------------------------------------LOCATIONS TABLE-------------------------------------------------
+
+------------------------------TEST FOR PRIMARY KEY CONSTRAINT-------------------------------
+
+-- BEFORE ASSIGNING PRIMARY KEY CONSTRAINT TO locations table
+
+
+-- CHECKING ALREADY INSERTED ROWS IN locations
+
+SELECT location_id,capacity FROM locations;
+
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+-- TRYING TO INSERT IN locations Table
+
+INSERT INTO locations (location_id,capacity)
+VALUES (1,50000);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- AFTER ASSIGNING PRIMARY KEY CONSTRAINT TO locations table
+
+-- CREATING PRIMARY KEY FOR LOCATIONS TABLE
+
+ALTER TABLE locations
+ADD CONSTRAINT pk_locations
+PRIMARY KEY (location_id);
+
+
+-- TRYING TO INSERT IN locations Table
+
+INSERT INTO locations (location_id,capacity)
+VALUES (1,50000);
+
+-- EXPECTED / ACUTAL OUTPUT
+--ORA-00001: unique constraint (CSY2038B4.PK_LOCATIONS) violated
+
+
+-- TRYING TO INSERT IN  VALID DATA locations Table
+
+
+INSERT INTO locations (location_id,capacity)
+VALUES (2,60000);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- DELETING ALL INSERTED DATA FROM LOCATIONS TABLE
+
+DELETE FROM locations;
+
+SELECT location_id,capacity FROM locations;
+
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+
+
+
+--------------------------------------------FESTIVALS TABLE-------------------------------------------------
+
+------------------------------TEST FOR PRIMARY KEY AND FOREIGN KEY CONSTRAINT-------------------------------
+
+
+-- BEFORE ASSIGNING ANY KIND OF CONSTRAINTS IN festivals table.
+
+-- CHECKING ALL COLUMN FOR festivals table
+DESC festivals; 
+
+-- CHECKING ALL COLUMN FOR festival_natures table
+DESC festival_natures; 
+
+-- QUERYING festival_nature_id FROM festival_natures table
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- INSERTING INTO festival_natures table
+
+INSERT INTO festival_natures(festival_nature_id,name)
+VALUES (1, 'CONCERT');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- CHECKING ALL COLUMN FOR locations table
+DESC locations; 
+
+
+-- TRYING TO INSERT IN locations Table
+
+INSERT INTO locations (location_id,capacity)
+VALUES (1,50000);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- CHECKING FOR PREVIOUSLY INSERTED DATA IN festivals table
+SELECT festival_nature_id,location_id FROM festivals;
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'CHRISTMAS');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- AFTER CREATING BOTH PRIMARY KEY AND FOREIGN KEY CONSTRAINTS
+
+-- CREATING PRIMARY KEY CONSTRAINTS
+
+ALTER TABLE festivals
+ADD CONSTRAINT pk_festivals
+PRIMARY KEY (festival_nature_id, location_id);
+
+
+-- CREATING FOREIGN KEY CONTRAINTS
+
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_festival_natures
+FOREIGN KEY (festival_nature_id)
+REFERENCES festival_natures(festival_nature_id);
+
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_locations
+FOREIGN KEY (location_id)
+REFERENCES locations(location_id);
+
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'CHRISTMAS');
+
+-- EXPECTED / ACUTAL OUTPUT
+--ORA-00001: unique constraint (CSY2038B4.PK_FESTIVALS) violated
+
+
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,2,'CHRISTMAS');
+-- EXPECTED / ACUTAL OUTPUT
+--ORA-02291: integrity constraint (CSY2038B4.FK_F_LOCATIONS) violated - parent
+--key not found
+
+
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festivals table
+
+DELETE FROM festivals;
+
+
+-- TRYING TO INSERT VALID DATA IN festivals table
+
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'CHRISTMAS');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festival_natures table
+DELETE FROM festival_natures;
+
+SELECT festival_nature_id,location_id FROM festivals;
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+------------------------------TEST FOR CHECK CONSTRAINT-------------------------------
+
+
+-- BEFORE ASSIGNING CHECK CONSTRAINT IN festivals table.
+
+-- CHECKING FOR PREVIOUSLY INSERTED DATA IN festivals table
+SELECT festival_nature_id,location_id FROM festivals;
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'christmas');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- DELETING PREVIOUSLY INSERTED ROWS from festivals table
+DELETE FROM festivals;
+
+-- AFTER ASSIGNING CHECK CONSTRAINT IN festivals table.
+-- CHECK CONSTRAINT FOR festival_name column
+
+ALTER TABLE festivals
+ADD CONSTRAINT ck_festivals_festival_name
+CHECK (festival_name = UPPER(festival_name));
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'christmas');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- ORA-02290: check constraint (CSY2038B4.CK_FESTIVALS_FESTIVAL_NAME) violated
+
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'CHRISTMAS');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festivals table
+DELETE FROM festivals;
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM locations table
+DELETE FROM locations;
+
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festival_natures table
+DELETE FROM festival_natures;
+
+SELECT festival_nature_id,location_id FROM festivals;
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+
+
+
+
+-------------------------------------------FESTIVAL_STAFF TABLE-------------------------------------------------
+
+------------------------------TEST FOR PRIMARY KEY AND FOREIGN KEY CONSTRAINT-------------------------------
+
+
+-- BEFORE ASSIGNING ANY KIND OF CONSTRAINTS IN festival_staff table.
+
+-- CHECKING ALL COLUMN FOR festival_staff table
+DESC festivals; 
+
+-- CHECKING ALL COLUMN FOR festival_natures table
+DESC festival_natures; 
+
+-- QUERYING festival_nature_id FROM festival_natures table
+
+SELECT festival_nature_id,name FROM festival_natures;
+
+-- INSERTING INTO festival_natures table
+
+INSERT INTO festival_natures(festival_nature_id,name)
+VALUES (1, 'CONCERT');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- CHECKING ALL COLUMN FOR locations table
+DESC locations; 
+
+
+-- TRYING TO INSERT IN locations Table
+
+INSERT INTO locations (location_id,capacity)
+VALUES (1,50000);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- CHECKING ALL COLUMN FOR staff table
+DESC staff; 
+
+-- TRYING TO INSERT staff Table
+
+INSERT INTO staff (staff_id,firstname)
+VALUES (1,'BISHOWNATH');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+-- CHECKING ALL COLUMN FOR festivals table
+DESC festivals; 
+
+-- TRYING TO INSERT festivals Table
+
+-- TRYING TO INSERT IN festivals Table
+INSERT INTO festivals (festival_nature_id,location_id,festival_name)
+VALUES (1,1,'CHRISTMAS');
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- INSERTING INTO festival_staff table
+
+-- CHECKING FOR PREVIOUSLY INSERTED DATA IN festival_name table
+
+SELECT festival_staff_id,festival_nature_id,location_id,staff_id FROM festival_staff;
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+-- INSERTING DATA INTO festival_staff table
+
+INSERT INTO festival_staff(festival_staff_id,festival_nature_id,location_id,staff_id)
+VALUES (1,1,1,1);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- AFTER ASSIGNING ANY KIND OF CONSTRAINTS IN festival_staff table.
+
+-- PRIMARY KEY FOR festival_staff table
+
+ALTER TABLE festival_staff
+ADD CONSTRAINT pk_festival_staff
+PRIMARY KEY (festival_staff_id);
+
+-- FOREIGN KEY FOR festival_staff table
+
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_festivals
+FOREIGN KEY (festival_nature_id, location_id)
+REFERENCES festivals(festival_nature_id, location_id);
+
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_staff
+FOREIGN KEY (staff_id)
+REFERENCES staff(staff_id);
+
+
+
+-- BEFORE ASSIGNING ANY KIND OF CONSTRAINTS IN festival_staff table.
+
+-- INSERTING DATA INTO festival_staff table
+
+INSERT INTO festival_staff(festival_staff_id,festival_nature_id,location_id,staff_id)
+VALUES (1,1,1,1);
+
+INSERT INTO festival_staff(festival_staff_id,festival_nature_id,location_id,staff_id)
+VALUES (2,1,2,1);
+
+-- EXPECTED / ACUTAL OUTPUT
+--ORA-00001: unique constraint (CSY2038B4.PK_FESTIVAL_STAFF) violated
+
+--ORA-02291: integrity constraint (CSY2038B4.FK_FS_FESTIVALS) violated - parent
+--key not found
+
+-- DELETING ALL ROW FROM festival_staff table
+
+DELETE FROM festival_staff; 
+
+-- INSERTING DATA INTO festival_staff table
+
+INSERT INTO festival_staff(festival_staff_id,festival_nature_id,location_id,staff_id)
+VALUES (1,1,1,1);
+
+-- EXPECTED / ACUTAL OUTPUT
+-- 1 row created.
+
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festival_staff table
+DELETE FROM festival_staff;
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festivals table
+DELETE FROM festivals;
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM locations table
+DELETE FROM locations;
+
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM festival_natures table
+DELETE FROM festival_natures;
+
+-- DELETING PREVIOUSLY INSERTED ROWS FROM staff table
+DELETE FROM staff;
+
+
+
+SELECT festival_staff_id,festival_nature_id,location_id,staff_id FROM festival_staff;
+-- EXPECTED / ACUTAL OUTPUT
+-- NO ROWS SELECTED
+
+
+
+--------------------------------------------VIEW-------------------------------------------------
+
+
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'FK%';
+
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'PK%';
+
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'CK%';

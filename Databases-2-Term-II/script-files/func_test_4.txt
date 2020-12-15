@@ -1,0 +1,138 @@
+
+/*
+
+	FUNC TEST FILE
+		-Contains the tests for functions
+		-Tests most of the functions using procedure 
+		-All the functions are directly implemented in procedure bodies without needing extra tests 
+		 and their results are visible also in the procedure tests
+		-Some functions which can be tested separately are tested in this file
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+---------------------------------------THIS FILE CONTAINS FUNCTION TESTS---------------------------------------
+ 
+SET SERVEROUTPUT ON
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- Procedure to test func_check_string_num
+CREATE OR REPLACE PROCEDURE proc_ck_func_check_string_num AS
+BEGIN
+	DBMS_OUTPUT.PUT_LINE('Testing string GOOD result should be 0. Result: '||func_check_string_num('GOOD'));
+	DBMS_OUTPUT.PUT_LINE('Testing string BAD999 result should be 1. Result: '||func_check_string_num('BAD999'));
+	DBMS_OUTPUT.PUT_LINE('Testing string BAD00 result should be 1. Result: '||func_check_string_num('BAD00'));
+END proc_ck_func_check_string_num;
+/
+SHOW ERRORS
+
+--------------------- TEST PROC_CK_FUNC_CHECK_STRING_NUM ------------------
+
+--Test the function func_check_string_num using procedure 
+--The output shows the test results
+EXEC proc_ck_func_check_string_num;
+--If the expected and obtained results differ, the function has error(s)
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- Procedure to test func_username and func_password
+CREATE OR REPLACE PROCEDURE proc_test_username_password(in_staff_id IN staff.staff_id%TYPE) IS
+vc_username VARCHAR2(5);
+vc_password VARCHAR2(5);
+BEGIN 
+	vc_username:= func_username(in_staff_id);
+	vc_password:=func_password(in_staff_id);
+	DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------');
+	DBMS_OUTPUT.PUT_LINE('USERNAME = '||vc_username);
+	DBMS_OUTPUT.PUT_LINE('PASSWORD = '||vc_password);
+END proc_test_username_password;
+/
+SHOW ERRORS
+
+--------------------- TEST PROC_TEST_USERNAME_PASSWORD ------------------
+
+--Test the functions using procedure 
+--The output shows the test results
+EXEC proc_test_username_password(5);
+
+--Expected : The generated username and password is displayed
+--Result   : The generated username and password is displayed
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- Procedure to test func_increase_salary
+CREATE OR REPLACE PROCEDURE proc_test_func_increase_salary(in_current_salary NUMBER,in_percent IN NUMBER) IS
+	vn_salary NUMBER(10,2);
+BEGIN 
+	vn_salary:=func_increase_salary(in_current_salary, in_percent);
+	DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------');
+	DBMS_OUTPUT.PUT_LINE('Previous Salary : '||in_current_salary);
+	DBMS_OUTPUT.PUT_LINE('Current Salary  : '||vn_salary);
+END proc_test_func_increase_salary;
+/
+SHOW ERRORS
+
+--------------------- TEST PROC_TEST_USERNAME_PASSWORD ------------------
+
+--Test the functions using procedure 
+--The output shows the previous price and discounted price
+EXEC proc_test_func_increase_salary(1000, 10);
+
+--Expected : Correct previous and increased salary is displayed (1000 and 1100) 
+--Result   : Correct previous and increased salary is displayed (1000 and 1100)
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- Procedure to test func_discount_location
+CREATE OR REPLACE PROCEDURE proc_test_func_discount_location(in_current_price NUMBER, in_percent IN NUMBER) IS
+	vn_price NUMBER(10,2);
+BEGIN 
+	vn_price:=func_discount_location(in_current_price, in_percent);
+	DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------');
+	DBMS_OUTPUT.PUT_LINE('Previous Price       : '||in_current_price);
+	DBMS_OUTPUT.PUT_LINE('Price After Discount : '||vn_price);
+END proc_test_func_discount_location;
+/
+SHOW ERRORS
+
+--------------------- TEST PROC_TEST_USERNAME_PASSWORD ------------------
+
+--Test the functions using procedure 
+--The output shows the previous price and discounted price
+EXEC proc_test_func_discount_location(1000, 10);
+
+--Expected : Correct previous and discounted price is displayed (1000 and 900) 
+--Result   : Correct previous and discounted price is displayed (1000 and 900)
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+--Drops for function testing procedures
+DROP PROCEDURE proc_ck_func_check_string_num;
+DROP PROCEDURE proc_test_username_password;
+DROP PROCEDURE proc_test_func_increase_salary;
+DROP PROCEDURE proc_test_func_discount_location;
+

@@ -1,0 +1,148 @@
+
+
+/*
+
+Student Database:
+Student: StdName, StdAddress, StdContactNo, Dateofjoin
+Array of data: CourseEnrolled
+Object: CGPA, Grade, Status,
+QUERY:
+1.	Find the details of the student whose name is ‘Devoulder’.
+2.	When did Devoulder join as student?
+3.	Show the address and contact number only of Devoulder
+4.	List the course enrolled by Neuman
+5.	What is the CGPA scored by Lee?
+6.	Find the average/max/min of the CGPA.
+7.	Find only the status and the name of the student who has scored more than 3.5 CGPA.
+8.	List all the student whose has attain Grade “A”.
+9.	Sort all the student according to the date of join first and then by CGPA.
+10.	Find the number of student who has not enrolled COMP232 course.
+
+*/
+
+--Assumed the collection name is students and db name is studentdb
+> use studentdb
+> show collections
+> student = db.students;
+> student.find().pretty();
+
+------------------------------------------------------------------------------------------------------
+
+
+--1.	Find the details of the student whose name is ‘Devoulder’.
+student.find(
+	{StdName: "Devoulder"},
+	{}
+).pretty()
+
+------------------------------------------------------------------------------------------------------
+
+
+--2.	When did Devoulder join as student?
+student.find(
+	{StdName: "Devoulder"},
+	{Dateofjoin: 1, _id: 0}
+).pretty()
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 3.	Show the address and contact number only of Devoulder
+student.find(
+	{StdName: "Devoulder"},
+	{StdAddress: 1, StdContactNo: 1, _id: 0}
+).pretty()
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 4.	List the course enrolled by Neuman
+
+student.find(
+	{StdName: "Neuman"},
+	{StdName: 1, CourseEnrolled: 1, _id: 0}
+).pretty()
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 5.	What is the CGPA scored by Lee?
+student.find(
+	{StdName: "Lee"},
+	{StdName: 1, CGPA: 1, _id: 0}
+).pretty()
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 6.	Find the average/max/min of the CGPA.
+
+student.aggregate([
+  { "$group": {
+    "_id": null,
+    "max_cgpa": { "$max": "$CGPA" },
+    "min_cgpa": { "$min": "$CGPA" },
+    "avg_cgpa": { "$avg": "$CGPA" }
+  }}
+])
+
+
+------------------------------------------------------------------------------------------------------
+
+
+-- 7.	Find only the status and the name of the student who has scored more than 3.5 CGPA.
+
+student.find(
+	{CGPA: {$gt:90}},
+	{StdName: 1, Status: 1, _id: 0}
+).pretty()
+
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 8.	List all the student whose has attain Grade “A”.
+
+student.find(
+	{Grade: 'A'},
+	{StdName: 1, _id: 0}
+).pretty()
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 9.	Sort all the student according to the date of join first and then by CGPA.
+
+student.find().sort( { Dateofjoin: 1, CGPA: 1 } ).pretty();
+
+
+------------------------------------------------------------------------------------------------------
+
+-- 10.	Find the number of student who has not enrolled COMP232 course.
+student.find( { 
+		CourseEnrolled: { $not: { $elemMatch: {$eq: 'COMP32'}}}
+	},
+	{}
+).count()
+
+------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

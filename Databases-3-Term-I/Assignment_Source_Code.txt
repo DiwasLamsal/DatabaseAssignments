@@ -1,0 +1,306 @@
+/*
+
+	DIWAS LAMSAL
+	18406547
+	DATABASE YEAR III 
+	SOURCE CODE
+
+*/
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--Load CSV with relevant headers for properties
+--The following command should create 400 nodes and 760 relationships
+--20 of the nodes are soccer teams and 380 of the nodes are league matches
+--Place the file at the import folder, rename it to data.csv and run the 
+--Following code
+LOAD CSV WITH HEADERS FROM "file:///epl.csv" as row
+MERGE (m:SoccerMatch{
+Div:row.Div, Date:row.Date,
+HomeTeam:row.HomeTeam, AwayTeam:row.AwayTeam,
+FullTimeHomeTeamGoals:toInteger(row.FTHG), FullTimeAwayTeamGoals:toInteger(row.FTAG), 
+FullTimeResult:row.FTR, HalfTimeHomeTeamGoals:toInteger(row.HTHG), 
+HalfTimeAwayTeamGoals:toInteger(row.HTAG), HalfTimeResult:row.HTR, 
+Referee:row.Referee, HomeTeamShots:toInteger(row.HS), 
+AwayTeamShots:toInteger(row.AS), HomeShotsOnTarget:toInteger(row.HST), 
+AwayShotsOnTarget:toInteger(row.AST), HomeTeamFouls:toInteger(row.HF), 
+AwayTeamFouls:toInteger(row.AF), 
+HomeTeamCorners:toInteger(row.HC), AwayTeamCorners:toInteger(row.AC), 
+HomeTeamYellowCards:toInteger(row.HY), AwayTeamYellowCards:toInteger(row.AY),
+HomeTeamRedCards:toInteger(row.HR), AwayTeamRedCards:toInteger(row.AR)})
+//Create the relationship between soccer teams and matches
+//This should show the home and away team for any specific match
+MERGE (homeTeam:SoccerTeam{name:row.HomeTeam})
+MERGE (awayTeam:SoccerTeam{name:row.AwayTeam})
+CREATE UNIQUE (homeTeam)<-[h:HOME]-(m)-[a:AWAY]->(awayTeam)
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--1)	Show all the EPL teams involved in the season.
+
+MATCH (n:SoccerTeam) RETURN n
+
+-- Answer: 20 teams displayed in the graph. 
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--2)	How many matches were played on Mondays?
+
+// Get all the matches with Mondays (Weekdays as 1)
+MATCH (m:SoccerMatch)
+WHERE apoc.date.fields(m.Date,'dd/MM/yyyy').weekdays = 1
+RETURN COUNT(m.Date) AS Number_Of_Matches_On_Monday;
+
+-- Answer: 17 matches.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--3)	Display the total number of goals “Liverpool” had 
+--		scored and conceded in the season. 
+
+//Retrieve the matches that involve Liverpool as home or away team
+MATCH (liv:SoccerTeam{name:'Liverpool'})<-[:HOME|:AWAY]-(sm:SoccerMatch)
+//Use with clause to rename the team name and to get the total Liverpool goals and opponent goals according to whether the team and game are home or away
+WITH liv.name AS Team_Name, 
+(CASE WHEN sm.HomeTeam='Liverpool' THEN sm.FullTimeHomeTeamGoals ELSE sm.FullTimeAwayTeamGoals END) AS Total_Goals_By_Team, 
+(CASE WHEN sm.HomeTeam='Liverpool' THEN sm.FullTimeAwayTeamGoals ELSE sm.FullTimeHomeTeamGoals END) AS Total_Goals_Against_Team
+//Display the results 
+//The use of SUM will provide total number of goals by Liverpool or opponents
+RETURN Team_Name, SUM(Total_Goals_By_Team) AS Total_Goals_By_Liverpool, SUM(Total_Goals_Against_Team) AS Total_Goals_Against_Liverpool
+
+-- Answer: Goals scored by Liverpool is 89 and goals conceded by Liverpool is 22.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--4)	Which teams have the most and least shots in the season?
+
+//Retrieve the teams that have played the league matches
+MATCH (st:SoccerTeam)<-[:HOME|:AWAY]-(sm:SoccerMatch)
+//Use with clause to rename the team name and to get the total team shots according to whether the team and game are home or away
+WITH st.name AS Team_Name, (CASE WHEN sm.HomeTeam=st.name THEN sm.HomeTeamShots ELSE sm.AwayTeamShots END) AS Total_Shots_By_Team
+//Display the results with descending order for getting highest shots by a team
+//The use of SUM will provide total number of shots by a particular team
+//It can then be sorted by using ORDER BY clause
+RETURN Team_Name, SUM(Total_Shots_By_Team) AS Highest_Total_Shots
+ORDER BY Highest_Total_Shots DESC //Change to ASC to get lowest team shots
+//Only display one result
+LIMIT 1
+
+-- Answer: Highest shots by Man City with 683 total shots and lowest shots by Burnley with 359 total shots.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--5)	Who refereed the most matches?
+
+// Get all the soccer matches
+MATCH (sm:SoccerMatch)
+// Group the matches by referee and their game count
+RETURN sm.Referee AS Referee, COUNT(*) AS Matches_Refereed
+// Order the data in descending order for referee with highest number of games 
+// To be displayed at the top. Limit 1 so that the highest number is only displayed. 
+ORDER BY COUNT(*) DESC LIMIT 1
+
+-- Answer: “A Taylor” who refereed 32 matches.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+
+--6)	How many matches “Arsenal” won as the away team? 
+
+// Match the results such that Arsenal is the away team
+// And the winner of the game is the away team, A represents away win
+MATCH (aa:SoccerMatch{AwayTeam:'Arsenal', FullTimeResult:'A'})
+RETURN COUNT(aa) AS Arsenal_Total_Away_Wins
+
+-- Answer: “Arsenal” won 7 matches as an away team.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+
+--7)	Display all the matches that “Man United” lost. 
+
+--PROJECTION
+// Retrieve the results when Man United is the home team but the away team won
+MATCH (lh:SoccerMatch) 
+WHERE lh.HomeTeam = 'Man United' AND lh.FullTimeResult = 'A'
+// Display the games where Man United lost as the home team with projection
+RETURN lh.HomeTeam AS Home_Team, lh.AwayTeam AS Away_Team, lh.FullTimeResult AS Full_Time_Result
+// Combine the results with UNION
+UNION
+// Retrieve the results when Man United is the away team but the home team won
+MATCH (la:SoccerMatch) 
+WHERE la.AwayTeam = 'Man United' AND la.FullTimeResult = 'H'
+// Display the games where Man United lost as the away team with projection
+RETURN la.HomeTeam AS Home_Team, la.AwayTeam AS Away_Team, la.FullTimeResult AS Full_Time_Result
+
+------------------------------------------------------------------------
+
+--NO PROJECTION
+// Retrieve the results when Man United is the home team but the away team won
+MATCH (lh:SoccerMatch) 
+WHERE lh.HomeTeam = 'Man United' AND lh.FullTimeResult = 'A'
+// Display the games where Man United lost as the home team without projection
+RETURN lh AS SoccerGame // Combine the results with UNION
+UNION
+// Retrieve the results when Man United is the away team but the home team won
+MATCH (la:SoccerMatch) 
+WHERE la.AwayTeam = 'Man United' AND la.FullTimeResult = 'H'
+// Display the games where Man United lost as the away team without projection
+RETURN la AS SoccerGame
+
+-- Answer: 10 games displayed in the screenshots.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+
+--8)	Display all matches that “Liverpool”
+--		 won but were down in the first half. 
+
+--PROJECTION
+//Retrieve the results when Liverpool is the Home Team and winner is the home team
+MATCH (lh:SoccerMatch{HomeTeam:'Liverpool',FullTimeResult:'H'})
+ //Restrict the results to get only those where away team has higher score in half time 
+WHERE lh.HalfTimeHomeTeamGoals < lh.HalfTimeAwayTeamGoals
+//For displaying the results in more readable format 
+WITH lh.HomeTeam AS Home_Team, lh.AwayTeam AS Away_Team, lh.HalfTimeHomeTeamGoals AS Home_Team_Half_Time_Goals, 
+lh.HalfTimeAwayTeamGoals AS Away_Team_Half_Time_Goals,
+lh.FullTimeResult AS Result, 'Liverpool' AS Winner
+//Display the results
+RETURN Home_Team, Away_Team, Home_Team_Half_Time_Goals, 
+Away_Team_Half_Time_Goals, Result, Winner
+//Merge the results
+UNION
+//Retrieve the results when Liverpool is the Away Team and winner is the away team
+MATCH (la:SoccerMatch{AwayTeam:'Liverpool',FullTimeResult:'A'})
+//Restrict the results to get only those where home team has higher score in half time 
+WHERE la.HalfTimeHomeTeamGoals > la.HalfTimeAwayTeamGoals
+//For displaying the results in more readable format
+WITH la.HomeTeam AS Home_Team, la.AwayTeam AS Away_Team, la.HalfTimeHomeTeamGoals AS Home_Team_Half_Time_Goals, 
+la.HalfTimeAwayTeamGoals AS Away_Team_Half_Time_Goals,
+la.FullTimeResult AS Result, 'Liverpool' AS Winner
+//Display the results
+RETURN Home_Team, Away_Team, Home_Team_Half_Time_Goals, 
+Away_Team_Half_Time_Goals, Result, Winner
+
+------------------------------------------------------------------------
+
+--NO PROJECTION
+//Retrieve the results when Liverpool is the Home Team and winner is the home team
+MATCH (lh:SoccerMatch{HomeTeam:'Liverpool',FullTimeResult:'H'})
+//Restrict the results to get only those where away team has higher score in half time 
+WHERE lh.HalfTimeHomeTeamGoals < lh.HalfTimeAwayTeamGoals
+WITH lh AS DataNode
+//Display the results
+RETURN DataNode
+//Merge the results
+UNION
+//Retrieve the results when Liverpool is the Away Team and winner is the away team
+MATCH (la:SoccerMatch{AwayTeam:'Liverpool',FullTimeResult:'A'})
+//Restrict the results to get only those where home team has higher score in half time 
+WHERE la.HalfTimeHomeTeamGoals > la.HalfTimeAwayTeamGoals
+WITH la AS DataNode
+//Display the results
+RETURN DataNode
+
+-- Answer: One occurrence was found between Liverpool and Crystal Palace where Liverpool was the home team. 
+-- Crystal Palace had scored one goal before the half time. 
+-- The game later ended up being 4-3 in the favour of Liverpool.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+
+--9)	Write a query to display the final ranking of all the 
+--		teams based on their total points.  
+
+// Retrieve all the matches with all the teams involved
+MATCH (st:SoccerTeam)<-[:AWAY|:HOME]-(sm:SoccerMatch)
+// Use WITH clause to produce relevant names to use in the RETURN 
+WITH st.name AS Team_Name, 
+// Use CASE to filter results for whenever a team is the home team or away team
+// Then multiply the records with provided information in the text file
+// The text file says yellow cards give 10 points and red cards give 25 points for both home
+// and away matches
+(CASE WHEN sm.HomeTeam=st.name THEN 
+(sm.HomeTeamYellowCards*10+sm.HomeTeamRedCards*25) 
+ELSE 
+(sm.AwayTeamYellowCards*10+sm.AwayTeamRedCards*25)
+END)
+AS Points_By_Team_In_Match
+// Display the results in a tabular format with readable and relevant names in Ascending order
+// The first team is the one with highest ranking and least points
+RETURN Team_Name, SUM(Points_By_Team_In_Match) AS Total_Points_By_Team
+ORDER BY Total_Points_By_Team
+
+-- Answer: The teams are displayed according to the ranking of their points, which here 
+-- is the opposite (more cards means more points but higher in rank)
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+--10)	Which team has drawn the most consecutive matches? 
+
+// Retrieve all the matches with all the teams
+MATCH
+(sm:SoccerMatch)-[:HOME|:AWAY]->(st:SoccerTeam)
+// Use WITH clause to produce relevant names to use in the RETURN and REDUCE
+// The Final_Result will be used as a list and all the elements will be accessed to get and
+// Work with the game results. The result should be a Draw and is denoted by D in our Dataset.
+// The result should be in order of date because it needs to account for the consecutive wins.
+// For retrieving the date in sortable format, need to use the code provided in neo4j docs
+WITH st, sm, [vals IN split(sm.Date, "/") | toInteger(vals)] AS dateVals
+WITH st.name as Team_Name, sm.FullTimeResult AS Final_Result, date({day: dateVals[0], month: dateVals[1], year: dateVals[2]}) AS game_date
+// The sorting is done here according to the date of the match
+ORDER BY game_date
+// The RETURN part returns the team name and the max total consecutive draws of the team 
+RETURN Team_Name, 
+// The REDUCE function is used to set and manipulate the count variables 
+// The list contains the game results which would hold the value D for a draw
+REDUCE(s = {maxConsecutiveDraws: 0, recentConsecutiveDraws: 0}, game_outcome IN COLLECT(Final_Result) |
+// For every draw result, the current consecutive draws should be incremented
+// If the current value exceeds the maximum value, the maximum value should be replaced
+// With the current one
+  CASE WHEN game_outcome = "D"
+    THEN {
+// The +1 is being used here because otherwise the last element would miss and every team 
+// Would have one less total consecutive draw value
+      maxConsecutiveDraws: CASE WHEN s.recentConsecutiveDraws + 1 > s.maxConsecutiveDraws THEN s.recentConsecutiveDraws + 1 ELSE s.maxConsecutiveDraws END,
+      recentConsecutiveDraws: s.recentConsecutiveDraws + 1
+    }
+// If the game is not a draw, recent values is changed to 0 but maximum value is set to
+// Whatever was held previously
+    ELSE {maxConsecutiveDraws: s.maxConsecutiveDraws, recentConsecutiveDraws: 0}
+  END
+  ).maxConsecutiveDraws AS Total_Consecutive_Draws_By_Team
+// Order the results in descending order to have the highest values first
+ORDER BY Total_Consecutive_Draws_By_Team DESC
+
+
+-- Answer: Man United, Burnley and Arsenal with 3 consecutive draws for each team. 
+-- If using LIMIT to restrict the output to one, Man United would be displayed.
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+

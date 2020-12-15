@@ -1,0 +1,163 @@
+/*
+
+	TRIGGER FILE
+		-Contains create commands for triggers 
+		-Triggers for login logout information are in the log script file
+	
+	GROUP 4
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+--@D:\Database_Assignment_II\script\trigger_4.txt
+
+
+
+----------------------------------------------------------- TRIGGERS -------------------------------------------------------
+
+--Triggers for addresses object table
+
+--This trigger does not allow duplicate addresses to be entered into the addresses table
+CREATE OR REPLACE TRIGGER trig_check_address
+BEFORE INSERT ON addresses
+FOR EACH ROW
+DECLARE
+	vn_count NUMBER(3);
+BEGIN
+	SELECT COUNT(street) INTO vn_count FROM addresses 
+	WHERE street = :NEW.street AND city = :NEW.city AND country = :NEW.country;
+	IF vn_count>0 THEN
+		RAISE_APPLICATION_ERROR (-20001,'ERROR! THE PROVIDED ADDRESS ALREADY EXISTS');
+	END IF;
+END trig_check_address;
+/
+SHOW ERRORS
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--Triggers for staff 
+
+--This trigger does not allow an invalid email to be entered while adding or updating a staff
+CREATE OR REPLACE TRIGGER trig_staff_email_ck
+BEFORE INSERT OR UPDATE OF email ON staff
+FOR EACH row
+WHEN (NEW.email NOT LIKE '%@%' OR NEW.email NOT LIKE '%.%')
+BEGIN
+	RAISE_APPLICATION_ERROR (-20001,'ERROR! INVALID EMAIL FORMAT');
+END trig_dob_ck;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--Switch Case
+-- Tutorialspoint (2019)
+-- Oracle Docs (2019)
+
+--This trigger does not allow string with numbers provided for a staff's firstname or lastname
+--It uses the function func_check_string_num which returns 1 when string contains a number or 0 when not
+CREATE OR REPLACE TRIGGER trig_staff_name_ck
+BEFORE INSERT OR UPDATE OF firstname, lastname ON staff
+FOR EACH row
+DECLARE
+	vn_ck_firstname NUMBER(3);
+	vn_ck_lastname NUMBER(3);
+BEGIN
+	vn_ck_firstname:= func_check_string_num(:NEW.firstname);
+	vn_ck_lastname:= func_check_string_num(:NEW.lastname);
+	
+	--Implementation of switch case
+	CASE vn_ck_firstname
+		WHEN 0 THEN DBMS_OUTPUT.PUT_LINE('VALID FIRSTNAME');
+		WHEN 1 THEN RAISE_APPLICATION_ERROR (-20001,'ERROR! INVALID FIRSTNAME! NAME CANNOT CONTAIN NUMBERS');
+		ELSE DBMS_OUTPUT.PUT_LINE('SOMETHING WENT WRONG');
+	END CASE;
+	
+	CASE vn_ck_lastname
+		WHEN 0 THEN DBMS_OUTPUT.PUT_LINE('VALID LASTNAME');
+		WHEN 1 THEN RAISE_APPLICATION_ERROR (-20001,'ERROR! INVALID LASTNAME! NAME CANNOT CONTAIN NUMBERS');
+		ELSE DBMS_OUTPUT.PUT_LINE('SOMETHING WENT WRONG');
+	END CASE;
+	
+END trig_dob_ck;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--This trigger displays a message saying you deleted this staff when a staff is deleted
+CREATE OR REPLACE TRIGGER trig_del_staff
+AFTER DELETE ON staff
+FOR EACH row
+BEGIN
+	DBMS_OUTPUT.PUT_LINE('YOU DELETED THE STAFF '||:OLD.firstname || ' ' || :OLD.lastname);
+END trig_del_staff;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--Triggers for locations
+
+--This trigger does not allow a negative value to be entered for price or capacity of location
+CREATE OR REPLACE TRIGGER trig_ck_location
+BEFORE INSERT OR UPDATE OF price, capacity ON locations
+FOR EACH row
+WHEN (NEW.price < 0 OR NEW.capacity < 0)
+BEGIN
+	RAISE_APPLICATION_ERROR (-20001,'ERROR! CANNOT HAVE VALUES LESS THAN ZERO');
+END trig_ck_location;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--Triggers for festival_natures
+
+--This trigger displays messages as per the interactions made on festival_natures table , i.e.
+--When inserting, updating or deleting a row, relevant messages are displayed
+CREATE OR REPLACE TRIGGER trig_festival_natures
+AFTER INSERT OR UPDATE OR DELETE ON festival_natures
+FOR EACH row
+BEGIN
+	IF INSERTING THEN
+		DBMS_OUTPUT.PUT_LINE('YOU INSERTED THE FESTIVAL NATURE '||:NEW.name || ' WITH FESTIVAL_NATURE_ID: '|| :NEW.festival_nature_id);
+	ELSIF UPDATING THEN
+		DBMS_OUTPUT.PUT_LINE('YOU UPDATED THE FESTIVAL NATURE '||:NEW.name || ' WITH FESTIVAL_NATURE_ID: '|| :OLD.festival_nature_id);
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('YOU DELETED THE FESTIVAL NATURE '||:OLD.name || ' WITH FESTIVAL_NATURE_ID: '|| :OLD.festival_nature_id);
+	END IF;
+END trig_festival_natures;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+--Triggers for festival_staff
+
+--This trigger displays messages as per the interactions made on festival_staff table, i.e.
+--When inserting, updating or deleting a row, relevant messages are displayed
+CREATE OR REPLACE TRIGGER trig_festival_staff
+AFTER INSERT OR UPDATE OR DELETE ON festival_staff
+FOR EACH row
+BEGIN
+	IF INSERTING THEN
+		DBMS_OUTPUT.PUT_LINE('YOU INSERTED A RECORD. FESTIVAL_STAFF_ID: '|| :NEW.festival_staff_id);
+	ELSIF UPDATING THEN
+		DBMS_OUTPUT.PUT_LINE('YOU UPDATED A RECORD. FESTIVAL_STAFF_ID: '|| :OLD.festival_staff_id);
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('YOU DELETED A RECORD. FESTIVAL_STAFF_ID: '|| :OLD.festival_staff_id);
+	END IF;
+END trig_festival_staff;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+

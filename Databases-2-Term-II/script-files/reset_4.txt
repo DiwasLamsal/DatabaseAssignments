@@ -1,0 +1,38 @@
+
+
+/*
+	
+	Automates the reset process by dropping everything, recreating all the tables, types, sequences, functions,
+	procedures, triggers and cursors
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+	
+*/
+
+--@D:\Database_Assignment_II\script\reset_4.txt
+
+--------------------------------------------OTHER DROPS---------------------------------------------------------------
+@D:\Database_Assignment_II\script\other_drops_4.txt
+-----------------------------------------------DROP-------------------------------------------------------------------
+@D:\Database_Assignment_II\script\drop_4.txt
+----------------------------------------------INSERT------------------------------------------------------------------
+@D:\Database_Assignment_II\script\create_4.txt
+--------------------------------------------CONSTRAINT----------------------------------------------------------------
+@D:\Database_Assignment_II\script\constraint_4.txt
+--------------------------------------------FUNCTIONS-----------------------------------------------------------------
+@D:\Database_Assignment_II\script\function_4.txt
+--------------------------------------------PROCEDURE-----------------------------------------------------------------
+@D:\Database_Assignment_II\script\procedure_4.txt
+---------------------------------------------TRIGGER------------------------------------------------------------------
+@D:\Database_Assignment_II\script\trigger_4.txt
+---------------------------------------------CURSOR-------------------------------------------------------------------
+@D:\Database_Assignment_II\script\cursor_4.txt
+----------------------------------------------------------------------------------------------------------------------
+
+SET LINESIZE 120 
+

@@ -1,0 +1,188 @@
+/*
+
+	INSERT FILE
+		-Contains commands for inserting data to the tables
+		-Shows usage of procedures for inserting 
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+--@D:\Database_Assignment_II\script\insert_4.txt
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+-------------------------------PLEASE CREATE ALL THE PROCEDURES FOR INSERTING BEFORE USING THEM HERE---------------------------------
+
+--Some dummy data have been taken from the tutorials
+
+
+--------------------- ADDRESSES OBJECT TABLE ------------------
+ 
+ --Format the table
+COLUMN street FORMAT A30;
+COLUMN city FORMAT A20;
+COLUMN country FORMAT A20;
+
+--Verify empty table
+SELECT street, city, country FROM addresses;
+
+--Insert without procedure
+INSERT INTO addresses(street, city, country)
+VALUES ('54 FESTIVE ROAD', 'NORTHAMPTON', 'UK');
+
+--Insert using procedure
+EXEC proc_insert_addresses('111 BAY STATE ROAD', 'BOSTON', 'USA');
+EXEC proc_insert_addresses('111 VALLEY WAY', 'SAN FERNANDO', 'USA');
+EXEC proc_insert_addresses('4545 ORACLE DRIVE', 'SAN FRANCISCO', 'USA');
+EXEC proc_insert_addresses('77 ELM STREET', 'NEWARK', 'USA');
+EXEC proc_insert_addresses('544 42ND STREET', 'NEW YORK', 'USA');
+EXEC proc_insert_addresses('111 BEACHCOMBER PLACE', 'OCEANSIDE', 'USA');
+EXEC proc_insert_addresses('25 MISSION WAY', 'SAN DIEGO', 'USA');
+EXEC proc_insert_addresses('177 AIRPORT ROAD', 'NEWARK', 'USA');
+EXEC proc_insert_addresses('SHREE ADARSHA MARG', 'KATHMANDU', 'NEPAL');
+
+--Verify insert
+SELECT street, city, country FROM addresses;
+
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+--------------------- STAFF TABLE ------------------
+
+--Verify empty table
+SELECT staff_id, firstname, lastname, leader FROM staff;
+
+--Requires address_type and contact_detail_varray_type
+
+--Insert without procedure
+INSERT INTO staff (staff_id, firstname, lastname, gender, contact, current_address, permanent_address, email, leader, salary)
+VALUES (seq_staff_id.NEXTVAL, 'RAMESH', 'THAPA', 'M', contact_detail_varray_type(contact_detail_type('9808123457', 'MOBILE'), 
+																			     contact_detail_type('01-4216354', 'LANDLINE'))
+																	, address_type('7500 IMPERIAL BLVD', 'LOS ANGELES', 'USA')
+																	, address_type('333 SAN JUAN BLVD', 'SAN JUAN', 'PUERTO RICO')
+																	, 'RAMESHTHAPA@GMAIL.COM', seq_staff_id.CURRVAL, 12990);
+
+
+--Insert with procedure
+EXEC proc_insert_staff('DIANE', 'BROWN', 'F', '(617)342-23442', 'LANDLINE', '981513244', 'MOBILE', '4242 MISTY LANE', 'SEATTLE', 'USA', 'KUNGSGATAN 56', 'STOCKHOLM', 'SWEDEN', 'DIANE_BROWN@HOTMAIL.COM', 1, 5000);
+EXEC proc_insert_staff('BAN', 'FORHAN', 'M', '98080421345', 'NCELL', '9841354657', 'NTC', '42 SALTY LAKE', 'WASHINGTON', 'RUSSIA', '42 SALTY LAKE', 'WASHINGTON', 'RUSSIA', 'FORHANBAN@GMAIL.COM', (seq_staff_id.CURRVAL+1), 2000);
+EXEC proc_insert_staff('KRUNAL', 'UPRETI', 'F', '(217)342-21375', 'LANDLINE', '984132787', 'MOBILE', '12 SHREE ADARSHA MARG', '3', 'NEPAL', 'DASHRATH MARGA', '3', 'NEPAL', 'KRUNALUPRETI@YAHOO.COM', 1, 20000);
+EXEC proc_insert_staff('KEVIN', 'COX', 'M', '(619)433-6845', 'LANDLINE', '9153421542', 'MOBILE', '5567 KNIGHTSBRIDGE COURT', 'LONDON', 'UK', '5567 KNIGHTSBRIDGE COURT', 'LONDON', 'UK', 'KEVINCOX@CMP.CO.UK', 1, 3155.55);
+EXEC proc_insert_staff('RANJAN', 'KHANAL', 'M', '(124)448-4214', 'LANDLINE', '9842142144', 'MOBILE', '123 CHUCCHWAL TOLE', 'KATHAMNDU', 'NEPAL', '10 SANKHAMUL', 'KATHAMNDU', 'NEPAL', 'RANJAN@TEST.COM', 1, 4510.55);
+EXEC proc_insert_staff('ARUNA', 'TIWARI', 'F', '(142)485-4231', 'LANDLINE', '9841144242', 'MOBILE', '15 VICTORY ROAD', 'HO CHI MIN', 'VIETNAM', '15 VICTORY ROAD', 'HO CHI MIN', 'VIETNAM', 'ARUNAT@GMAIL.COM', 3, 5510.55);
+
+--Verify insert
+SELECT staff_id, firstname, lastname, leader FROM staff;
+
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+--------------------- FESTIVAL_NATURES TABLE ------------------
+
+--Verify empty table
+SELECT * FROM festival_natures;
+
+--Insert without procedure
+INSERT INTO festival_natures (festival_nature_id,name,target_audience)
+VALUES (seq_festival_nature_id.NEXTVAL, 'PURAN', 'OLD');
+
+--Insert using procedure
+EXEC proc_insert_festival_natures('CONCERT', 'YOUTH');
+EXEC proc_insert_festival_natures('CONCERT', 'OLD');
+EXEC proc_insert_festival_natures('DANCE', 'YOUTH');
+EXEC proc_insert_festival_natures('KIDS FESTIVAL', 'KIDS');
+
+
+--Verify insert
+SELECT * FROM festival_natures;
+ 
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+ 
+--------------------- LOCATIONS TABLE ------------------
+  
+--Verify empty table
+SELECT location_id, capacity, price, l.address.street, l.address.city, l.address.country FROM locations l;
+
+--Requires reference of addresses table
+
+--Insert without procedure
+INSERT INTO locations (location_id,capacity,price,address)
+SELECT seq_location_id.NEXTVAL, 1500, 10000, REF(a)
+FROM addresses a
+WHERE a.street = '111 VALLEY WAY';
+
+--Insert with procedure
+EXEC proc_insert_locations(1200, 20500, '177 AIRPORT ROAD');
+EXEC proc_insert_locations(500, 5500, '25 MISSION WAY');
+EXEC proc_insert_locations(750, 2500, '4545 ORACLE DRIVE');
+EXEC proc_insert_locations(200, 1000, '544 42ND STREET');
+
+--Verify insert
+SELECT location_id, capacity, price, l.address.street AS street, l.address.city  AS city, l.address.country  AS country FROM locations l ORDER BY location_id;
+
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+
+------------------------ FESTIVALS TABLE ---------------------
+
+--Verify empty table
+SELECT festival_nature_id, location_id, festival_name FROM festivals;
+
+--Insert without procedure
+INSERT INTO festivals (festival_nature_id, location_id, festival_name, performance)
+VALUES (1, 1, 'BHAGAVATA', performance_table_type(performance_type('PRAWACHAN', 'GURU ARBINDRA NATH', 'RELIGIOUS'),
+												  performance_type('PRAWACHAN', 'GURU ANUBHAVAM ACHARYA', 'RELIGIOUS')));
+
+
+--Insert with procedure
+--Format of Arguments: Festival Nature Id, Location Id, Festival name, Performance1 - name, artist, genre, Performance 2- name, artist, genre
+EXEC proc_insert_festivals(2, 3, 'SCREAM FEST', 'SINGING', 'NEPATHYA', 'ROCK', 'MUSIC', 'ANTIM GRAHAN', 'METAL');
+EXEC proc_insert_festivals(5, 1, 'PHOENIX FESTIVAL', 'QUIZ', 'PE ENTERTAINERS', 'KIDS', 'GAME', 'PE ENTERTAINERS', 'KIDS');
+EXEC proc_insert_festivals(3, 2, 'MUSIC FEST', 'METAL PERFORMANCE', 'METALLICA', 'METAL', 'ROCK PERFORMANCE', 'BLINK 182', 'PUNK ROCK');
+EXEC proc_insert_festivals(4, 3, 'DANCE FEST', 'SALSA', 'CARTOONZ CREW', 'LINDY HOP', 'SWING DANCE', 'CARTOONZ', 'SWING');
+
+
+--Verify insert
+SELECT festival_nature_id, location_id, festival_name FROM festivals;
+
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+	
+--------------------- FESTIVAL_STAFF TABLE ------------------
+
+
+--Verify empty table
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+--Insert without procedure
+INSERT INTO festival_staff (festival_staff_id,staff_id,festival_nature_id,location_id)
+VALUES (seq_festival_staff_id.NEXTVAL, 1, 2, 3);
+
+--Insert with procedure
+EXEC proc_insert_festival_staff(3, 5, 1);
+EXEC proc_insert_festival_staff(2, 3, 2);
+EXEC proc_insert_festival_staff(1, 5, 1);
+EXEC proc_insert_festival_staff(7, 4, 3);
+
+--Verify insert
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+--Expected : The inserted data appears in the table 
+--Result   : The inserted data appears in the table
+
+
+
+
+

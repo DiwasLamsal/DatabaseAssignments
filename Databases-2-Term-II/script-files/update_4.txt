@@ -1,0 +1,147 @@
+/*
+
+	UPDATE FILE
+		-Contains commands for updating existing data in tables
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\update_4.txt
+
+---------------------------------------THIS FILE CONTAINS UPDATES---------------------------------------
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+----------------------------------------------------------------------------------------------
+
+--Update addresses object table
+UPDATE addresses a SET a.city = 'NEW BANESHWOR' WHERE a.street = 'SHREE ADARSHA MARG';
+--Query
+SELECT * FROM addresses WHERE street = 'SHREE ADARSHA MARG';
+
+--Change it back
+UPDATE addresses a SET a.city = 'KATHMANDU' WHERE a.street = 'SHREE ADARSHA MARG';
+--Query
+SELECT * FROM addresses WHERE street = 'SHREE ADARSHA MARG';
+
+--Expected outcome: City for the provided street SHREE ADARSHA MARG is first changed to NEW BANESHWOR and then back to KATHMANDU 
+
+----------------------------------------------------------------------------------------------
+--Update staff table
+
+--Update firstname and lastname
+UPDATE staff SET firstname = 'SURESH', lastname = 'BHUJEL'
+WHERE staff_id = 1;
+
+--Query
+SELECT staff_id, firstname, lastname FROM staff WHERE staff_id = 1;
+
+--Expected outcome: Firstname and lastname for staff id 1 are changed to SURESH BHUJEL
+
+--Update contact detail
+UPDATE staff s
+SET s.contact = contact_detail_varray_type(contact_detail_type('123-451-523', 'TELEPHONE'), 
+	contact_detail_type('9811541542', 'MOBILE'))
+WHERE s.staff_id = 3;
+
+--Query
+SELECT contact FROM staff WHERE staff_id = 3;
+
+--Expected outcome: Contact details are changed for the staff id 3 
+
+--Update temporary address
+UPDATE staff s
+SET s.current_address = address_type('12 DELHI ROAD', 'DELHI', 'INDIA')
+WHERE s.staff_id = 2;
+
+--Query
+SELECT current_address FROM staff WHERE staff_id = 2;
+
+--Expected outcome: Current addrress of the staff is changed to 12 DELHI ROAD, DELHI, INDIA
+
+--Increase staff salary
+EXEC proc_increase_salary(2, 11.5);
+EXEC proc_increase_salary(1, 15);
+
+--Query 
+SELECT staff_id, salary FROM staff;
+
+--Expected outcome: Staff salary are raised by 11.5 and 15 percent for staff ids 2 and 1 respectively
+
+----------------------------------------------------------------------------------------------
+--Update locations table
+
+--Update address ref and capacity together
+UPDATE locations l
+SET l.address =(
+	SELECT REF(a)
+	FROM addresses a
+	WHERE a.street = 'SHREE ADARSHA MARG'), capacity = 1250
+WHERE l.location_id = 2;
+
+--Query
+SELECT location_id, l.address.street AS street, l.address.city AS city, l.address.country AS country, capacity FROM locations l WHERE l.location_id = 2;
+
+--Expected outcome: address is updated to shree adarsha marg and capacity is changed to 1250 for location id 2
+
+--Discount location
+EXEC proc_discount_location(2, 25);
+
+--Query
+SELECT location_id, price FROM location;
+
+--Expected outcome: Price is reduced by 25 percent in location id 2
+
+----------------------------------------------------------------------------------------------
+--Update festival_natures table
+
+--Update name and target audience
+UPDATE festival_natures
+SET name = 'OLD CONCERT', target_audience = 'AGE 50+'
+WHERE festival_nature_id = 3;
+
+--Query
+SELECT * FROM festival_natures WHERE festival_nature_id = 3;
+
+--Expected outcome: name and target audience of the festival nature is changed to OLD CONCERT and AGE 50+ respectively
+
+----------------------------------------------------------------------------------------------
+--Update festivals table
+
+--Domscheit, W. (2014)
+--Update performance nested table
+UPDATE TABLE(SELECT f.performance
+                FROM   festivals f
+                WHERE  f.festival_nature_id = 3 AND f.location_id = 2) p
+    SET p.name = 'METAL'
+	WHERE p.artist = 'METALLICA';
+
+--Query 
+SELECT performance FROM festivals f
+WHERE  f.festival_nature_id = 3 AND f.location_id = 2;
+
+--Expected outcome: name of the performance is changed to METAL for artist metallica
+
+----------------------------------------------------------------------------------------------
+--Update festival_staff table
+
+--Update the staff associated with festival_staff
+UPDATE festival_staff SET staff_id = 2 
+WHERE festival_staff_id = 5;
+
+--Query
+SELECT * FROM festival_staff WHERE festival_staff_id = 5;
+
+--Expected outcome: Staff id is 2  for festival_staff_id 5
+
+----------------------------------------------------------------------------------------------
+

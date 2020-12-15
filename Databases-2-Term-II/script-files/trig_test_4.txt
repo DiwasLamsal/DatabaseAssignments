@@ -1,0 +1,419 @@
+
+/*
+
+	TRIG TEST FILE
+		-Contains the tests for triggers
+		-Tests all the triggers used except the log detail triggers
+		-Includes all the four types of tests needed for each trigger
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\trig_test_4.txt
+
+
+---------------------------------------THIS FILE CONTAINS TRIGGER TESTS---------------------------------------
+ 
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+
+--Query log details
+COLUMN event_date FORMAT A20;
+SELECT * FROM login_details;
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_check_address
+
+--This trigger is supposed to prevent adding an addresses that matches a previous one
+
+-----------------------------------------------------------------------------
+
+--Insert dummy data first
+INSERT INTO addresses 
+VALUES('RP STREET', 'RP CITY', 'RP COUNTRY'); 
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+--Try to insert the same data
+INSERT INTO addresses 
+VALUES('RP STREET', 'RP CITY', 'RP COUNTRY'); 
+--Expected outcome: Error is generated preventing the row from being inserted into the addressed table
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+INSERT INTO addresses 
+VALUES('UNIQUE STREET', 'UNIQUE CITY', 'UNIQUE COUNTRY'); 
+--Expected outcome: No errors are shown and the row is inserted into the addresses table
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+--Trigger should not allow repeated data to be inserted
+SELECT street, city, country FROM addresses;
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+--Trigger should allow unique data to be inserted
+SELECT street, city, country FROM addresses;
+
+-----------------------------------------------------------------------------
+
+--RESET
+DELETE FROM addresses WHERE street IN ('RP STREET','UNIQUE STREET');
+
+--Test reset
+SELECT street, city, country FROM addresses;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_staff_email_ck
+
+--This trigger is supposed to prevent adding a staff with invalid email address (with missing @ and . characters)
+
+-----------------------------------------------------------------------------
+
+--First Insert a valid row
+INSERT INTO staff(staff_id, firstname, lastname, email, leader)
+VALUES (99999, 'TEST FIRSTNAME', 'TEST LASTNAME', 'TESTVALID@VALID.COM', 99999);
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+INSERT INTO staff(staff_id, firstname, lastname, email, leader)
+VALUES (99995, 'TEST FIRSTNAME', 'TEST LASTNAME', 'TESTINVALID', 99995);
+
+INSERT INTO staff(staff_id, firstname, lastname, email, leader)
+VALUES (99996, 'TEST FIRSTNAME', 'TEST LASTNAME', 'TESTINVALID@', 99996);
+
+INSERT INTO staff(staff_id, firstname, lastname, email, leader)
+VALUES (99997, 'TEST FIRSTNAME', 'TEST LASTNAME', 'TESTINVALID.', 99997);
+
+UPDATE staff SET email = 'UPDATEINVALIDEMAIL'
+WHERE staff_id = 99999;
+--Expected outcomes for each insert or update attempt: Error message shown saying invalid email and row not inserted or updated in the staff table
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+INSERT INTO staff(staff_id, firstname, lastname, email, leader)
+VALUES (99998, 'TEST FIRSTNAME', 'TEST LASTNAME', 'TESTVALID@VALID.COM', 99998);
+
+UPDATE staff SET email = 'ANOTHERVALID@VALID.COM'
+WHERE staff_id = 99998;
+
+--Expected outcomes: The row is inserted and updated succesfully
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+--Trigger should not allow invalid data to be inserted
+SELECT staff_id, firstname, lastname, email FROM staff;
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+--Trigger should allow valid data to be inserted
+SELECT staff_id, firstname, lastname, email FROM staff;
+
+-----------------------------------------------------------------------------
+
+--RESET
+DELETE FROM staff WHERE staff_id IN(99995, 99996, 99997, 99998, 99999);
+
+--Test reset
+SELECT staff_id, firstname, lastname, email FROM staff;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_staff_name_ck
+
+--This trigger is supposed to prevent adding a staff with invalid name (with numbers)
+
+-----------------------------------------------------------------------------
+
+--First Insert a valid row
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99999, 'TEST FIRSTNAME', 'TEST LASTNAME', 99999);
+
+-----------------------------------------------------------------------------
+
+--1. Fires where needed
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99995, 'TEST01', 'TEST LASTNAME12', 99995);
+
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99996, 'TEST', '12LASTNAME', 99996);
+
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99997, 'TEST9TE', 'TEST LASTNAME', 99997);
+
+UPDATE staff SET firstname = '12NAME' 
+WHERE staff_id = 99999;
+
+UPDATE staff SET lastname = 'NLAST000' 
+WHERE staff_id = 99999;
+
+-- Expected outcomes for each insert or update attempt: Error message shown saying invalid firstname or lastname
+-- and row is not inserted or updated in the staff table
+
+-----------------------------------------------------------------------------
+
+--2. Does not fire where not needed 
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99998, 'TEST FIRSTNAME', 'TEST LASTNAME', 99998);
+
+UPDATE staff SET firstname = 'VALID FIRST', lastname = 'VALID LAST'
+WHERE staff_id = 99998;
+
+--Expected outcomes: The row is inserted and updated succesfully, also messages showing VALID FIRSTNAME and VALID LASTNAME
+
+-----------------------------------------------------------------------------
+
+--3. Changes are made if it is supposed to
+--Trigger should not allow invalid data to be inserted
+SELECT staff_id, firstname, lastname FROM staff;
+
+-----------------------------------------------------------------------------
+
+--4. Changes are not made if it is not supposed to
+--Trigger should allow valid data to be inserted
+SELECT staff_id, firstname, lastname FROM staff;
+
+-----------------------------------------------------------------------------
+
+--RESET
+DELETE FROM staff WHERE staff_id IN(99995, 99996, 99997, 99998, 99999);
+
+--Test reset
+SELECT staff_id, firstname, lastname FROM staff;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_del_staff
+
+--This trigger is supposed to notify deletion of staff
+
+-----------------------------------------------------------------------------
+
+--Insert dummy valid data into staff
+INSERT INTO staff(staff_id, firstname, lastname, leader)
+VALUES (99998, 'TEST FIRSTNAME', 'TEST LASTNAME', 99998);
+
+-----------------------------------------------------------------------------
+
+--Insert dummy data into locations
+INSERT INTO locations(location_id, price, capacity)
+VALUES (99999, 15000, 120);
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+DELETE FROM staff WHERE staff_id = 99998;
+--Expected outcome: A message is displayed saying you deleted a staff along with the name of the staff
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+DELETE FROM locations WHERE location_id = 99999;
+--Expected outcome: No extra message is displayed
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+-- Makes no changes
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+SELECT staff_id, firstname, lastname FROM staff;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_ck_location
+
+--This trigger is supposed to prevent negative values from being inserted as price or capacity for a location
+
+-----------------------------------------------------------------------------
+
+--First enter a valid row
+INSERT INTO locations(location_id, price, capacity)
+VALUES (99996, 5555, 111);
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+INSERT INTO locations(location_id, price, capacity)
+VALUES (99997, -5000, 120);
+
+INSERT INTO locations(location_id, price, capacity)
+VALUES (99998, 5000, -120);
+
+UPDATE locations SET price = -200
+WHERE location_id = 99996;
+
+-- Expected outcomes for each insert or update attempt: Error message shown saying cannot have values less than zero and the row is not inserted
+-- into the locations table or not updated
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+INSERT INTO locations(location_id, price, capacity)
+VALUES (99999, 5000, 120);
+--Expected outcome: No error message is displayed and the row is inserted into the locations table
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+--Trigger should not allow invalid data to be inserted
+SELECT location_id, price, capacity FROM locations;
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+--Trigger should allow valid data to be inserted
+SELECT location_id, price, capacity FROM locations;
+
+-----------------------------------------------------------------------------
+
+--RESET
+DELETE FROM locations WHERE location_id IN(99999, 99998, 99997, 99996);
+
+--Test reset
+SELECT location_id, price, capacity FROM locations;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_festival_natures
+
+--This trigger is supposed to notify any insert, update or delete performed on festival_natures table
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+--Insert
+	INSERT INTO festival_natures
+	VALUES (99999, 'TEST NAME', 'TEST AUDIENCE');
+--Update
+	UPDATE festival_natures SET name = 'UPDATED NAME' WHERE festival_nature_id = 99999;
+--Delete
+	DELETE FROM festival_natures WHERE festival_nature_id = 99999;
+--Expected outcome: For each insert, update or delete, a relevant message is shown about the performed action
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+--Insert
+	INSERT INTO locations(location_id, price, capacity)
+	VALUES (99999, 5000, 120);
+--Update
+	UPDATE locations SET price = 9999 WHERE location_id = 99999;
+--Delete
+	DELETE FROM locations WHERE location_id = 99999;
+--Expected outcome: No message is displayed
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+	SELECT * FROM festival_natures;
+	SELECT location_id, price, capacity FROM locations;
+--The attempted tasks are performed and the trigger does not affect the data	
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+	SELECT * FROM festival_natures;
+	SELECT location_id, price, capacity FROM locations;
+--The attempted tasks are performed and the trigger does not affect the data
+
+-----------------------------------------------------------------------------
+
+--RESET
+	DELETE FROM festival_natures WHERE festival_nature_id = 99999;
+	DELETE FROM locations WHERE location_id = 99999;
+
+--Test Reset
+	SELECT * FROM festival_natures;
+	SELECT location_id, price, capacity FROM locations;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+---------------------- TEST trig_festival_staff
+
+--This trigger is supposed to notify any insert, update or delete performed on festival_staff table
+
+-----------------------------------------------------------------------------
+
+--1 Fires where needed
+--Insert
+	INSERT INTO festival_staff
+	VALUES (99999, 1, 1, 1);
+--Update
+	UPDATE festival_staff SET staff_id = 2 WHERE festival_staff_id = 99999;
+--Delete
+	DELETE FROM festival_staff WHERE festival_staff_id = 99999;
+--Expected outcome: For each insert, update or delete, a relevant message is shown about the performed action
+
+-----------------------------------------------------------------------------
+
+--2 Does not fire where not needed 
+--Insert
+	INSERT INTO locations(location_id, price, capacity)
+	VALUES (99999, 5000, 120);
+--Update
+	UPDATE locations SET price = 9999 WHERE location_id = 99999;
+--Delete
+	DELETE FROM locations WHERE location_id = 99999;
+--Expected outcome: No message is displayed
+
+-----------------------------------------------------------------------------
+
+--3 Changes are made if it is supposed to
+	SELECT * FROM festival_staff;
+	SELECT location_id, price, capacity FROM locations;
+--The attempted tasks are performed and the trigger does not affect the data	
+
+-----------------------------------------------------------------------------
+
+--4 Changes are not made if it is not supposed to
+	SELECT * FROM festival_staff;
+	SELECT location_id, price, capacity FROM locations;
+--The attempted tasks are performed and the trigger does not affect the data	
+
+-----------------------------------------------------------------------------
+
+--RESET
+	DELETE FROM festival_staff WHERE festival_staff_id = 99999;
+	DELETE FROM locations WHERE location_id = 99999;
+
+--Test Reset
+	SELECT * FROM festival_staff;
+	SELECT location_id, price, capacity FROM locations;
+--Expected outcome: The dummy data inserted for testing trigger are removed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+

@@ -1,0 +1,163 @@
+
+/*
+
+	CREATE FILE
+		-Contains create commands for creating types, sequences and tables
+		-Creates are in order
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\create_4.txt
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+--------------------------------------------TYPES-------------------------------------------------
+
+--This command can be used to verify what has been created in the schema
+SELECT object_name FROM user_objects;
+
+
+--address_type
+CREATE OR REPLACE TYPE address_type AS OBJECT(
+	street VARCHAR2(30),
+	city VARCHAR2(30),
+	country VARCHAR2(30)
+);
+/
+
+--addresses table made of address_type
+CREATE TABLE addresses OF address_type;
+
+--contact_detail_type
+CREATE OR REPLACE TYPE contact_detail_type AS OBJECT(
+	contact_number VARCHAR2(15),
+	number_type VARCHAR2(30)
+);
+/
+
+--contact_detail_varray_type made of contact_detail_type
+CREATE TYPE contact_detail_varray_type AS VARRAY(2) OF contact_detail_type;
+/
+
+--performance_type
+CREATE OR REPLACE TYPE performance_type AS OBJECT(
+	name VARCHAR2(30),
+	artist VARCHAR2(30),
+	genre VARCHAR2(30)
+);
+/
+
+--performance_table_type made of performance_type
+CREATE TYPE performance_table_type AS TABLE OF performance_type;
+/
+
+
+--------------------------------------------TABLES-------------------------------------------------
+
+
+--Staff table and the sequence
+CREATE TABLE staff(
+	staff_id NUMBER(6),
+	firstname VARCHAR2(20),
+	lastname VARCHAR2(20),
+	gender CHAR DEFAULT 'M',
+	contact contact_detail_varray_type,
+	current_address address_type,
+	permanent_address address_type,
+	email VARCHAR2(60),
+	leader NUMBER(6) NOT NULL,
+	salary NUMBER(10, 2)
+);
+
+CREATE SEQUENCE seq_staff_id
+INCREMENT BY 1
+START WITH 1
+MINVALUE 0
+MAXVALUE 999999;
+
+
+--Festival_natures table and the sequence
+CREATE TABLE festival_natures(
+	festival_nature_id NUMBER(6),
+	name VARCHAR2(30),
+	target_audience VARCHAR2(30)
+);
+
+CREATE SEQUENCE seq_festival_nature_id
+INCREMENT BY 1
+START WITH 1
+MINVALUE 0 
+MAXVALUE 999999;
+
+
+--Locations table and the sequence
+CREATE TABLE locations(
+	location_id NUMBER(6),
+	address REF address_type SCOPE IS addresses,
+	capacity NUMBER(5),
+	price NUMBER(10,2)
+);
+
+CREATE SEQUENCE seq_location_id
+INCREMENT BY 1
+START WITH 1
+MINVALUE 0 
+MAXVALUE 999999;
+
+
+--Festivals table
+CREATE TABLE festivals(
+	festival_nature_id NUMBER(6) NOT NULL,
+	location_id NUMBER(6) NOT NULL,
+	festival_name VARCHAR2(30),
+	performance performance_table_type
+)
+NESTED TABLE performance STORE AS performance_table;
+
+
+
+--Festival_staff table and the sequence
+CREATE TABLE festival_staff(
+	festival_staff_id NUMBER(6),
+	staff_id NUMBER(6) NOT NULL,
+	festival_nature_id NUMBER(6) NOT NULL,
+	location_id NUMBER(6) NOT NULL
+);
+
+CREATE SEQUENCE seq_festival_staff_id
+INCREMENT BY 1
+START WITH 1
+MINVALUE 0 
+MAXVALUE 999999;
+
+
+--------------------------------------------VIEW-------------------------------------------------
+--Confirm that all the creates have worked properly 
+
+--View objects
+COLUMN object_name FORMAT A30;
+COLUMN object_type FORMAT A12;
+SELECT object_name, object_type FROM user_objects
+WHERE object_type = 'TYPE';
+
+--View tables
+COLUMN tname FORMAT A30;
+SELECT * FROM TAB;
+
+--View Sequences
+COLUMN sequence_name FORMAT A30;
+SELECT sequence_name FROM user_sequences;
+
+
+
+

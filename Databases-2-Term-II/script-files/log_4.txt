@@ -1,0 +1,109 @@
+/*
+
+	LOG FILE
+		-Contains the create and drop commands for log table and triggers 
+		-This script should be run once the user has been created
+		-It allows storing login and logout information
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+--@D:\Database_Assignment_II\script\log_4.txt
+
+DROP TABLE login_details;
+
+----------------------------------------------------------------------------------------------------------------------------
+--Table for storing information of logging in and out
+CREATE TABLE login_details(
+	performed_by VARCHAR2(20),
+    event_type VARCHAR2(20),
+    event_date DATE,
+    event_time VARCHAR2(14)
+);
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--Triggers for checking the login and logout
+--RebellionRider (2019).
+--Matthias Hoys (2012).
+--Trigger for recording logs of logging in to the system
+CREATE OR REPLACE TRIGGER trig_record_login
+AFTER LOGON ON SCHEMA
+DECLARE
+	vc_message VARCHAR2(30);
+	vn_hour NUMBER(2);
+BEGIN
+
+------------------------------------------------------------------------------------------ 
+--Not able to implement because SET SERVEROUTPUT ON cannot be called from within a trigger
+------------------------------------------------------------------------------------------ 
+  SELECT TO_CHAR(SYSDATE, 'hh24') INTO vn_hour FROM DUAL;
+  IF vn_hour>= 5 AND vn_hour <12 THEN 
+	vc_message := 'GOOD MORNING!';
+  ELSIF vn_hour >= 12 AND vn_hour < 17 THEN
+	vc_message := 'GOOD AFTERNOON!';
+  ELSIF vn_hour >= 17 AND vn_hour < 21 THEN
+	vc_message := 'GOOD EVENING!';
+  ELSE 
+	vc_message := 'IT IS LATE ALREADY! YOU SHOULD GET SOME SLEEP';
+  END IF;
+ 
+  DBMS_OUTPUT.PUT_LINE('-----------------------------');
+  DBMS_OUTPUT.PUT_LINE('HELLO THERE '||USER);
+  DBMS_OUTPUT.PUT_LINE(vc_message);
+  DBMS_OUTPUT.PUT_LINE('-----------------------------');
+------------------------------------------------------------------------------------------ 
+
+ 
+  INSERT INTO login_details VALUES(
+    USER, ora_sysevent, SYSDATE, TO_CHAR(SYSDATE, 'hh24:mi:ss')
+  );
+  COMMIT;
+END trig_record_login;
+/
+SHOW ERRORS
+----------------------------------------------------------------------------------------------------------------------------
+--Trigger for recording logs of logging out of the system
+CREATE OR REPLACE TRIGGER trig_record_logoff
+BEFORE LOGOFF ON SCHEMA
+BEGIN
+  INSERT INTO login_details VALUES(
+    USER, ora_sysevent, SYSDATE, TO_CHAR(SYSDATE, 'hh24:mi:ss')
+  );
+  COMMIT;
+END trig_record_logoff;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+--DROP TRIGGER trig_record_login;
+--DROP TRIGGER trig_record_logoff;
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,228 @@
+/*
+
+
+	CREATE CURSOR FILE
+		-Contains commands for creating the cursors
+		-Contains both implicit and explicit types of cursors
+		-Contains all the Cursor Attributes
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\cursor_4.txt
+
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+----------------------------------------------------------- CURSORS -------------------------------------------------------
+
+/*
+	Implicit Cursor
+
+	-This procedure uses implicit cursor while deleting an address and displays which address was deleted.
+	-If address not found, it displays the message 'NO SUCH ADDRESS WAS FOUND'
+		
+	Parameter in_street: Take the street of the address to be deleted
+
+*/
+CREATE OR REPLACE PROCEDURE proc_del_address_cursor(in_street VARCHAR2) IS
+BEGIN
+	DELETE FROM addresses WHERE street = in_street;
+	IF SQL%FOUND THEN
+		DBMS_OUTPUT.PUT_LINE('ADDRESS WITH STREET "'||in_street || '" DELETED SUCCESSFULLY!');
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('NO SUCH ADDRESS WAS FOUND!');
+	END IF;
+END proc_del_address_cursor;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+/*
+	Implicit Cursor
+	
+	-This procedure uses implicit cursor while updating all the locations with price below provided price
+	-It also displays the number of found and updated locations
+	-If no location was found, it displays a message saying so
+
+	Parameter in_price: Take the maximum price for location
+	
+*/
+CREATE OR REPLACE PROCEDURE proc_num_locations_price(in_price NUMBER) IS
+	vn_location_id locations.location_id%TYPE;
+BEGIN
+	UPDATE locations SET price = price + 50 WHERE price <= in_price;
+	IF SQL%NOTFOUND THEN
+		DBMS_OUTPUT.PUT_LINE('LOCATION WITH PRICE LESS THAN "'|| in_price || '" NOT FOUND!');
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('THERE ARE '||SQL%ROWCOUNT||' LOCATIONS WITH PRICE LESS THAN '||in_price|| ', and they have been updated.');
+	END IF;
+END proc_num_locations_price;
+/
+SHOW ERRORS
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of FOR loop
+	
+	-This procedure uses explicit cursor while displaying all the locations
+	-It also displays the number of locations found
+
+	Parameter out_num_records: This parameter returns the total number of found rows(locations)
+	
+*/
+CREATE OR REPLACE PROCEDURE proc_address_cursor(out_num_records OUT NUMBER) AS
+	CURSOR cur_name IS
+	SELECT location_id, l.address.street AS street, l.address.city AS city, l.address.country AS country, capacity, price 
+	FROM locations l;
+	vn_count NUMBER(3):=0;
+BEGIN
+	FOR rec_cur_names IN cur_name LOOP 
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		DBMS_OUTPUT.PUT_LINE(cur_name%ROWCOUNT || '. The location costs '|| rec_cur_names.price || '. The address of the location is');
+		DBMS_OUTPUT.PUT_LINE(rec_cur_names.street || ', '|| rec_cur_names.city || ', '|| rec_cur_names.country || '. The capacity is '||rec_cur_names.capacity);
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		vn_count := cur_name%ROWCOUNT;
+	END LOOP;
+	out_num_records:= vn_count;
+
+END proc_address_cursor;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of WHILE loop
+	
+	-This procedure uses explicit cursor while displaying all the festival_natures
+	-It also displays the number of festival_natures found
+	-It also displays whether the cursor is open or closed
+	Parameter out_num_records: This parameter returns the total number of found rows(festival_natures)
+	
+*/
+CREATE OR REPLACE PROCEDURE proc_festival_natures_cursor(out_num_records OUT NUMBER) AS
+	CURSOR cur_name IS
+	SELECT festival_nature_id, name, target_audience
+	FROM festival_natures;	
+	--Need to declare when using while
+	rec_cur_names cur_name%ROWTYPE;
+BEGIN
+	OPEN cur_name;
+	FETCH cur_name INTO rec_cur_names;
+	IF cur_name%NOTFOUND THEN
+		DBMS_OUTPUT.PUT_LINE('NO FESTIVAL NATURES WERE FOUND IN THE SYSTEM!');
+		out_num_records:=0;
+	END IF;
+	WHILE cur_name%FOUND LOOP
+		IF cur_name%ISOPEN THEN
+			DBMS_OUTPUT.PUT_LINE('THE CURSOR IS OPEN');
+		END IF;
+	
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		DBMS_OUTPUT.PUT_LINE(cur_name%ROWCOUNT || ' The festival nature '|| rec_cur_names.name || ' targets the audiences ' || rec_cur_names.target_audience);
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		out_num_records:=cur_name%ROWCOUNT;
+		FETCH cur_name INTO rec_cur_names;
+	END LOOP;
+	CLOSE cur_name;
+	
+	IF NOT cur_name%ISOPEN THEN
+		DBMS_OUTPUT.PUT_LINE('THE CURSOR IS NOW CLOSED');
+	END IF;
+	
+END proc_festival_natures_cursor;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+/*
+	Explicit Cursor, Use of FOR loop
+	
+	-This procedure uses explicit cursor while displaying all the staff contact numbers along with some other details
+
+*/
+CREATE OR REPLACE PROCEDURE proc_staff_contact_cursor AS
+	CURSOR cur_name IS
+	SELECT staff_id, firstname, lastname, c.contact_number AS cnumber, c.number_type AS ctype, email, salary
+	FROM staff s, TABLE (s.contact) c ORDER BY staff_id;
+	vn_count NUMBER(3):=0;
+BEGIN
+	FOR rec_staff IN cur_name LOOP 
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		DBMS_OUTPUT.PUT_LINE(rec_staff.staff_id || '. Contact details for the staff: '|| rec_staff.firstname || ' ' || rec_staff.lastname);
+		DBMS_OUTPUT.PUT_LINE(' Contact Number: '|| rec_staff.cnumber || ', Contact Type: '|| rec_staff.ctype || ', Email: '||rec_staff.email);
+		DBMS_OUTPUT.PUT_LINE(' The salary of the staff is: ' || rec_staff.salary);
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		vn_count := cur_name%ROWCOUNT;
+	END LOOP;
+	IF vn_count = 0 THEN 
+		DBMS_OUTPUT.PUT_LINE('NO RECORDS WERE FOUND!');
+	END IF;
+END proc_staff_contact_cursor;
+/
+SHOW ERRORS
+
+----------------------------------------------------------------------------------------------------------------------------
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of no loop
+	
+	-This procedure uses explicit cursor while displaying weekly salary of the provided staff
+	-It uses functions such as ROUND, TRUNC, FLOOR and CEIL
+
+	Parameter in_staff_id: The id of the staff whose salary is to be displayed
+	
+*/
+--View staff weekly salary
+CREATE OR REPLACE PROCEDURE proc_weekly_sal_cursor(in_staff_id NUMBER) AS
+	CURSOR cur_name IS
+	SELECT staff_id, firstname, lastname, salary
+	FROM staff
+	WHERE staff_id = in_staff_id;
+	rec_cur_names cur_name%ROWTYPE;
+	
+	--Variable for displaying salary
+	vn_weekly_salary NUMBER(10,2);
+BEGIN
+	OPEN cur_name;
+	FETCH cur_name INTO rec_cur_names;
+	IF cur_name%NOTFOUND THEN
+		DBMS_OUTPUT.PUT_LINE('NO STAFF WAS FOUND WITH THE PROVIDED ID!');
+	ELSE
+		vn_weekly_salary := (rec_cur_names.salary*7)/(30); -- Assuming 30 days in a month
+		
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		DBMS_OUTPUT.PUT_LINE('Staff id        :  '|| rec_cur_names.staff_id);
+		DBMS_OUTPUT.PUT_LINE('Name            :  '|| rec_cur_names.firstname || ' ' || rec_cur_names.lastname);
+		DBMS_OUTPUT.PUT_LINE('Monthly Salary  :  '|| rec_cur_names.salary);
+		DBMS_OUTPUT.PUT_LINE('Weekly Salary   :  '|| vn_weekly_salary);
+		DBMS_OUTPUT.PUT_LINE('Rounded Weekly  :  '|| ROUND(vn_weekly_salary, -1) || ' - to tens place'); --Round
+		DBMS_OUTPUT.PUT_LINE('Trunc Weekly    :  '|| TRUNC(vn_weekly_salary, -1) || ' - to tens place'); --Trunc
+		DBMS_OUTPUT.PUT_LINE('Floored Weekly  :  '|| CEIL(vn_weekly_salary)); -- Ceil
+		DBMS_OUTPUT.PUT_LINE('Ceiled Weekly   :  '|| FLOOR(vn_weekly_salary)); -- Floor
+		DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------');
+		
+		FETCH cur_name INTO rec_cur_names;
+	END IF;
+	CLOSE cur_name;	
+END proc_weekly_sal_cursor;
+/
+SHOW ERRORS
+
+
+----------------------------------------------------------------------------------------------------------------------------

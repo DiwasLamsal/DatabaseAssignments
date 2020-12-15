@@ -1,0 +1,113 @@
+
+/*
+
+	CREATE TEST FILE
+		-Contains commands for testing the creates
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\create_test_4.txt
+
+
+
+
+-------------------------------------------- CREATING TYPES -------------------------------------------------
+
+-- TEST
+--View Object TYPES
+COLUMN object_name FORMAT A30;
+COLUMN object_type FORMAT A12;
+SELECT object_name, object_type FROM user_objects
+WHERE object_type = 'TYPE';
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE CREATING ALL TYPES ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+--------- AFTER CREATING ALL TYPES ------------
+
+--EXPECTED OUTPUT
+-- 5 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 5 ROWS SELECTED
+
+
+
+
+
+
+-------------------------------------------- CREATING TABLES -------------------------------------------------
+
+-- TEST
+--View ALL TABLES
+COLUMN tname FORMAT A30;
+SELECT * FROM TAB;
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE CREATING ALL TABLES ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+--------- AFTER CREATING ALL TABLES ------------
+
+--EXPECTED OUTPUT
+-- 7 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 7 ROWS SELECTED
+
+
+
+
+
+-------------------------------------------- CREATING SEQUENCE -------------------------------------------------
+
+-- TEST
+--View SEQUENCE
+COLUMN sequence_name FORMAT A30;
+SELECT sequence_name FROM user_sequences;
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE CREATING ALL SEQUENCE ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+--------- AFTER CREATING ALL SEQUENCE ------------
+
+--EXPECTED OUTPUT
+-- 4 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 4 ROWS SELECTED
+

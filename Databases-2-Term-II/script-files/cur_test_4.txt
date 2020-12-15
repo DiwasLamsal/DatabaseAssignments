@@ -1,0 +1,226 @@
+
+/*
+
+	CUR TEST FILE
+		-Contains the tests for cursors
+		-Tests all the procedures used for cursors
+		
+	Note* : You need to have insert script file run before running these tests
+	
+	
+	GROUP 4
+	
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+--@D:\Database_Assignment_II\script\cur_test_4.txt
+
+
+---------------------------------------THIS FILE CONTAINS CURSOR TESTS---------------------------------------
+ 
+SET SERVEROUTPUT ON
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_DEL_ADDRESS_CURSOR ------------------
+
+/*
+	Implicit Cursor
+
+	-This procedure uses implicit cursor while deleting an address and displays which address was deleted.
+	-If address not found, it displays the message 'NO SUCH ADDRESS WAS FOUND'
+		
+	Parameter in_street: Take the street of the address to be deleted
+
+*/
+
+
+--Valid street name
+
+--Check the street exists
+SELECT * FROM addresses WHERE street = '111 BEACHCOMBER';
+--Expected Result : 1 row selected
+--Actual Result   : 1 row selected
+
+
+EXEC proc_del_address_cursor('111 BEACHCOMBER');
+--Expected Result : Displays ADDRESS WITH STREET 111 BEACHCOMBER DELETED SUCCESSFULLY! and deletes the address
+--Actual Result   : Displays ADDRESS WITH STREET 111 BEACHCOMBER DELETED SUCCESSFULLY! and deletes the address
+
+--Test Delete
+SELECT * FROM addresses WHERE street = '111 BEACHCOMBER';
+--Expected Result : No rows selected
+--Actual Result   : No rows selected
+
+--Invalid street name
+--Check the street exists
+SELECT * FROM addresses WHERE street = 'INVALID STREET';
+--Expected Result : No rows selected
+--Actual Result   : No rows selected
+
+EXEC proc_del_address_cursor('INVALID STREET');
+--Expected Result : Displays NO SUCH ADDRESS WAS FOUND!
+--Actual Result   : Displays NO SUCH ADDRESS WAS FOUND!
+
+--Test Delete
+SELECT * FROM addresses WHERE street = 'INVALID STREET';
+--Expected Result : No rows selected
+--Actual Result   : No rows selected
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_NUM_LOCATIONS_PRICE ------------------
+
+/*
+	Implicit Cursor
+	
+	-This procedure uses implicit cursor while updating all the locations with price below provided price
+	-It also displays the number of found and updated locations
+	-If no location was found, it displays a message saying so
+
+	Parameter in_price: Take the maximum price for location
+	
+*/
+
+--Lower Bound
+EXEC proc_num_locations_price(0);
+--Expected Result : LOCATION WITH PRICE LESS THAN 0 NOT FOUND!
+--Actual Result   : LOCATION WITH PRICE LESS THAN 0 NOT FOUND!
+
+--Middle Bound
+EXEC proc_num_locations_price(8000);
+--Expected Result : Some locations found and their price updated.
+--Actual Result   : Some locations found and their price updated.
+
+--Upper Bound
+EXEC proc_num_locations_price(99999999);
+--Expected Result : All the locations found and their price updated.
+--Actual Result   : All the locations found and their price updated.
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_ADDRESS_CURSOR ------------------
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of FOR loop
+	
+	-This procedure uses explicit cursor while displaying all the locations
+	-It also displays the number of locations found
+
+	Parameter out_num_records: This parameter returns the total number of found rows(locations)
+	
+*/
+
+VAR TOTAL_LOCATIONS NUMBER;
+EXEC proc_address_cursor(:TOTAL_LOCATIONS);
+
+--Expected Result : Displays details about all the locations
+--Actual Result   : Displays details about all the locations 
+
+--Test of out parameter 
+PRINT TOTAL_LOCATIONS;
+
+--Expected Result : Displays total number of locations
+--Actual Result   : Displays total number of locations
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_FESTIVAL_NATURES_CURSOR ------------------
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of WHILE loop
+	
+	-This procedure uses explicit cursor while displaying all the festival_natures
+	-It also displays the number of festival_natures found
+	-It also displays whether the cursor is open or closed
+	Parameter out_num_records: This parameter returns the total number of found rows(festival_natures)
+	
+*/
+
+VAR TOTAL_FESTIVAL_NATURES NUMBER;
+EXEC proc_festival_natures_cursor(:TOTAL_FESTIVAL_NATURES);
+
+--Expected Result : Displays details about all the festival_natures
+--Actual Result   : Displays details about all the festival_natures
+
+
+PRINT TOTAL_FESTIVAL_NATURES;
+--Expected Result : Displays total number of festival_natures
+--Actual Result   : Displays total number of festival_natures
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_STAFF_CONTACT_CURSOR ------------------
+
+/*
+	Explicit Cursor, Use of FOR loop
+	
+	-This procedure uses explicit cursor while displaying all the staff contact numbers along with some other details
+
+*/
+
+EXEC proc_staff_contact_cursor;
+
+--Expected Result : Displays contact details of all the staff
+--Actual Result   : Displays contact details of all the staff
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_WEEKLY_SAL_CURSOR ------------------
+
+
+/*
+	Explicit Cursor, Use of OUT parameter, Use of no loop
+	
+	-This procedure uses explicit cursor while displaying weekly salary of the provided staff
+	-It uses functions such as ROUND, TRUNC, FLOOR and CEIL
+
+	Parameter in_staff_id: The id of the staff whose salary is to be displayed
+	
+*/
+
+--Providing valid staff id
+EXEC proc_weekly_sal_cursor(1);
+--Expected Result : Displays weekly salary of staff
+--Actual Result   : Displays weekly salary of staff
+
+
+--Providing invalid staff id
+EXEC proc_weekly_sal_cursor(99);
+--Expected Result : Displays NO STAFF WAS FOUND WITH THE PROVIDED ID!
+--Actual Result   : Displays NO STAFF WAS FOUND WITH THE PROVIDED ID!
+
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+

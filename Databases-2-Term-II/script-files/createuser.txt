@@ -1,0 +1,39 @@
+/*
+
+	-Create User CSY2038B4 for Group 4
+
+	Mistapink (2015)
+	-alter session set "_ORACLE_SCRIPT"=true; --FOR 12C
+
+	CREATE USER FILE
+		-Contains commands for creating the user
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+
+--@D:\Database_Assignment_II\script\createuser.txt
+
+------------------------------------------------------------------------------------
+
+CREATE USER csy2038B4 IDENTIFIED BY group4;
+GRANT CREATE SESSION TO CSY2038B4;
+GRANT CREATE TABLE TO CSY2038B4;
+GRANT CREATE VIEW TO CSY2038B4;
+GRANT CREATE SEQUENCE TO CSY2038B4;
+GRANT CREATE SYNONYM TO CSY2038B4;
+GRANT CREATE PROCEDURE TO CSY2038B4;
+GRANT CREATE TRIGGER TO CSY2038B4;
+GRANT CREATE CLUSTER TO CSY2038B4;
+GRANT CREATE TYPE TO CSY2038B4;
+GRANT UNLIMITED TABLESPACE TO CSY2038B4;
+
+ALTER USER CSY2038B4 QUOTA UNLIMITED ON SYSTEM;
+

@@ -1,0 +1,87 @@
+/*
+
+	OTHER DROPS FILE
+		-Contains the drop commands for functions, procedures, triggers and procedures using cursor 
+	
+	GROUP 4
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+	
+*/
+
+
+--@D:\Database_Assignment_II\script\other_drops_4.txt
+
+---------------------------------------- FUNCTION DROPS --------------------------------------
+DROP FUNCTION func_count_staff;
+DROP FUNCTION func_count_staff_salary;
+DROP FUNCTION func_count_festivals;
+DROP FUNCTION func_exp_location;
+DROP FUNCTION func_chp_location;
+DROP FUNCTION func_increase_salary;
+DROP FUNCTION func_discount_location;
+DROP FUNCTION func_username;
+DROP FUNCTION func_password;
+DROP FUNCTION func_check_string_num;
+
+
+--------------------------------------- PROCEDURE DROPS --------------------------------------
+
+DROP PROCEDURE proc_insert_addresses;
+DROP PROCEDURE proc_insert_festival_natures;
+DROP PROCEDURE proc_insert_locations;
+DROP PROCEDURE proc_insert_staff;
+DROP PROCEDURE proc_insert_festivals;
+DROP PROCEDURE proc_insert_festival_staff;
+DROP PROCEDURE proc_reset_seq;
+DROP PROCEDURE proc_count_staff;
+DROP PROCEDURE proc_count_staff_salary;
+DROP PROCEDURE proc_count_festivals;
+DROP PROCEDURE proc_exp_location;
+DROP PROCEDURE proc_chp_location;
+DROP PROCEDURE proc_festival_detail;
+DROP PROCEDURE proc_show_staff_address;
+DROP PROCEDURE proc_increase_salary;
+DROP PROCEDURE proc_discount_location;
+DROP PROCEDURE proc_username_password;
+DROP PROCEDURE proc_location_capacity_ck;
+DROP PROCEDURE proc_staff_firstname;
+DROP PROCEDURE proc_staff_surname;
+
+
+--------------------------------------- TRIGGER DROPS ---------------------------------------
+
+DROP TRIGGER trig_check_address;
+DROP TRIGGER trig_staff_email_ck;
+DROP TRIGGER trig_staff_name_ck;
+DROP TRIGGER trig_del_staff;
+DROP TRIGGER trig_ck_location;
+DROP TRIGGER trig_festival_natures;
+DROP TRIGGER trig_festival_staff;
+
+--------------------------------------- CURSOR DROPS ----------------------------------------
+
+DROP PROCEDURE proc_num_locations_price;
+DROP PROCEDURE proc_del_address_cursor;
+DROP PROCEDURE proc_address_cursor;
+DROP PROCEDURE proc_festival_natures_cursor;
+DROP PROCEDURE proc_staff_contact_cursor;
+DROP PROCEDURE proc_weekly_sal_cursor;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

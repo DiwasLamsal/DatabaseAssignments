@@ -1,0 +1,414 @@
+/*
+
+	QUERY FILE
+		-Contains the commands to query the data added to the database
+		-Includes usage of procedures and cursors
+		-Shows usage of out parameter
+		-Shows usage of almost all the features from Term I for example: nested queries, UNION, LEFT JOIN, MIN, AVG etc.
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\query_4.txt
+
+---------------------------------------THIS FILE CONTAINS QUERIES---------------------------------------
+ 
+--Set linesize to display all the columns in a nice format without title line breaks
+SET linesize 125
+
+----------------------------------------------------------------------------------------------------------------------------------
+--Query log details
+COLUMN event_date FORMAT A20;
+SELECT * FROM login_details ORDER BY event_date ASC;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+--------------------- ADDRESSES OBJECT TABLE ------------------
+ 
+--Format the columns
+COLUMN street FORMAT A30;
+COLUMN city FORMAT A20;
+COLUMN country FORMAT A20;
+
+--Query whole table
+--INITCAP makes the text appear in Camel Case
+SELECT INITCAP(street) AS street, city, country FROM addresses;
+
+--Other queries
+
+--Querying addresses where no locations exist or no staff live
+--Usage of MINUS and UNION
+--Help taken from tutorial week 10
+SELECT a.city, a.street, a.country FROM addresses a
+MINUS(
+SELECT s.current_address.city, s.current_address.street, s.current_address.country FROM staff s
+UNION
+SELECT ss.permanent_address.city, ss.permanent_address.street, ss.permanent_address.country FROM staff ss
+UNION
+SELECT l.address.city, l.address.street, l.address.country FROM locations l);
+--As expected, the addresses that exist in the locations are only removed as locations used in staff table are object types and unique to 
+--data in the addresses table.
+
+--Querying addresses where locations exist
+--Usage of INTERSECT
+SELECT a.city, a.street, a.country FROM addresses a
+INTERSECT
+SELECT l.address.city, l.address.street, l.address.country FROM locations l;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+--------------------- STAFF TABLE ------------------
+
+--Query the whole table
+
+--Format the columns
+COLUMN firstname FORMAT A10
+COLUMN lastname FORMAT A10
+COLUMN contact_number FORMAT A15
+COLUMN number_type FORMAT A12
+COLUMN current_street FORMAT A15 WOR
+COLUMN current_city FORMAT A15 WOR
+COLUMN current_country FORMAT A15 WOR
+COLUMN permanent_street FORMAT A16 WOR
+COLUMN permanent_city FORMAT A15 WOR
+COLUMN permanent_country FORMAT A18 WOR
+
+
+--Query with current address
+SELECT staff_id, firstname, lastname, gender, c.contact_number, c.number_type, s.current_address.street AS current_street, s.current_address.city AS current_city, s.current_address.country AS current_country
+FROM staff s, TABLE (s.contact) c ORDER BY staff_id;
+
+--Query with permanent address
+SELECT staff_id, firstname, lastname, gender, c.contact_number, c.number_type, s.permanent_address.street AS permanent_street, s.permanent_address.city AS permanent_city, s.permanent_address.country AS permanent_country
+FROM staff s, TABLE (s.contact) c ORDER BY staff_id;
+
+
+--Other queries
+
+--Staff with leader names
+--Usage of INNER JOIN
+SELECT s.staff_id, s.firstname, s.lastname, l.staff_id AS leader_id, l.firstname AS leader_firstname, l.lastname AS leader_lastname
+FROM staff s JOIN staff l ON
+s.leader = l.staff_id
+ORDER BY s.staff_id;
+
+
+--Staff having higher salary than leaders using subquery
+SELECT s.firstname, s.lastname, s.salary
+FROM staff s
+WHERE EXISTS(
+	SELECT l.staff_id FROM staff l
+	WHERE s.leader = l.staff_id
+	AND s.salary>l.salary);
+
+
+--Average salary of staff
+SELECT AVG(salary) FROM staff;
+
+--Highest salary of staff
+SELECT MAX(salary) FROM staff;
+
+--Staff having highest salary
+SELECT s.staff_id, s.firstname, s.lastname, s.salary
+FROM staff s
+WHERE s.salary IN(
+	SELECT MAX(salary) FROM staff);
+
+
+--Lowest salary of staff
+SELECT MIN(salary) FROM staff;
+
+--Staff having lowest salary
+SELECT s.staff_id, s.firstname, s.lastname, s.salary
+FROM staff s
+WHERE s.salary IN(
+	SELECT MIN(salary) FROM staff);
+
+--Rest of the staff (Staff not having lowest salary)
+SELECT s.staff_id, s.firstname, s.lastname, s.salary
+FROM staff s
+WHERE s.salary NOT IN(
+	SELECT MIN(salary) FROM staff);
+
+
+--Total budget of company allocated in staff salary
+SELECT SUM(salary) FROM staff;
+
+--Number of staff
+SELECT COUNT(staff_id) FROM staff;
+
+--Staff having leaders
+SELECT s.staff_id, s.firstname, s.lastname
+FROM staff s
+WHERE s.leader != s.staff_id;
+
+--Staff having no leaders
+SELECT s.staff_id, s.firstname, s.lastname
+FROM staff s
+WHERE s.leader = s.staff_id;
+
+
+--Query using procedure
+
+--Get username and password
+EXEC proc_username_password(2);
+EXEC proc_username_password(&staff_id);
+
+
+--Total number of staff
+EXEC proc_count_staff;
+
+--Total number of staff with salary more than provided number
+EXEC proc_count_staff_salary(10000);
+EXEC proc_count_staff_salary(15000);
+EXEC proc_count_staff_salary(&amount);
+
+--Query staff details using id
+EXEC proc_show_staff_address(1);
+EXEC proc_show_staff_address(2);
+EXEC proc_show_staff_address(3);
+EXEC proc_show_staff_address(4);
+EXEC proc_show_staff_address(5);
+EXEC proc_show_staff_address(&staff_id);
+
+--Query staff firstname and lastname
+EXEC proc_staff_firstname(1);
+EXEC proc_staff_surname(1);
+
+EXEC proc_staff_firstname(3);
+EXEC proc_staff_surname(3);
+
+EXEC proc_staff_firstname(&staff_id);
+EXEC proc_staff_surname(&staff_id);
+
+--Query using cursor
+--View staff contact details 
+EXEC proc_staff_contact_cursor;
+
+--Query staff weekly salary using cursor
+EXEC proc_weekly_sal_cursor(1);
+EXEC proc_weekly_sal_cursor(3);
+EXEC proc_weekly_sal_cursor(4);
+EXEC proc_weekly_sal_cursor(&staff_id);
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+--------------------- FESTIVAL_NATURES TABLE ------------------
+
+--Query the whole table
+
+COLUMN name FORMAT a20
+COLUMN target_audience FORMAT a15
+
+SELECT * FROM festival_natures;
+
+--Other queries
+
+--Festival natures for old people
+SELECT * FROM festival_natures WHERE target_audience = 'OLD';
+
+--Cartesian product (NOT READABLE)
+SELECT fn.name, fn.target_audience, l.capacity, l.price FROM festival_natures fn, locations l;
+
+--Using cursor
+--Usage of OUT parameter 
+VAR TOTAL_FESTIVAL_NATURES NUMBER;
+EXEC proc_festival_natures_cursor(:TOTAL_FESTIVAL_NATURES);
+PRINT TOTAL_FESTIVAL_NATURES;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+--------------------- LOCATIONS TABLE ------------------
+ 
+--Query the whole table
+
+COLUMN street FORMAT A15 WOR
+COLUMN city FORMAT A15 WOR
+COLUMN country FORMAT A15 WOR
+
+SELECT location_id, capacity, price, l.address.street AS street, l.address.city  AS city, l.address.country  AS country FROM locations l ORDER BY location_id;
+
+--Other queries
+
+
+--Most Expensive Location
+SELECT l.location_id, l.address.street AS street, l.address.city  AS city, l.address.country  AS country, l.capacity, l.price
+FROM locations l
+WHERE l.price IN(
+	SELECT MAX(price) FROM locations);
+
+--Cheapest Location
+SELECT l.location_id, l.address.street AS street, l.address.city  AS city, l.address.country  AS country, l.capacity, l.price
+FROM locations l
+WHERE l.price IN(
+	SELECT MIN(price) FROM locations);
+
+--Location with highest capacity
+SELECT l.location_id, l.address.street AS street, l.address.city  AS city, l.address.country  AS country, l.capacity, l.price
+FROM locations l
+WHERE l.capacity IN(
+	SELECT MAX(capacity) FROM locations);
+
+--Location with lowest capacity
+SELECT l.location_id, l.address.street AS street, l.address.city  AS city, l.address.country  AS country, l.capacity, l.price
+FROM locations l
+WHERE l.capacity IN(
+	SELECT MIN(capacity) FROM locations);
+
+--Query using procedure
+
+--Price of most expensive location
+EXEC proc_exp_location;
+
+--Price of cheapest location
+EXEC proc_chp_location;
+
+
+--Query the number of groups that can fit in a location
+--The format:- First Argument: locaion_id, Second Argument: Group Size
+EXEC proc_location_capacity_ck(3, 50);
+EXEC proc_location_capacity_ck(5, 70);
+EXEC proc_location_capacity_ck(2, 111);
+EXEC proc_location_capacity_ck(2, 5);
+
+--Query using cursor 
+
+--Variable used as out parameter to display number of records
+VAR TOTAL_LOCATIONS NUMBER;
+EXEC proc_address_cursor(:TOTAL_LOCATIONS);
+PRINT TOTAL_LOCATIONS;
+
+
+--Displays Number of locations below given price
+--Also increases the location prices by 50
+EXEC proc_num_locations_price(200);
+EXEC proc_num_locations_price(20000);
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+------------------------ FESTIVALS TABLE ---------------------
+
+--Query the whole table
+
+COLUMN festival_name FORMAT A20 WOR
+COLUMN performance_name FORMAT A20 WOR
+COLUMN artist FORMAT A20 WOR
+COLUMN genre FORMAT A15
+
+SELECT festival_nature_id, location_id, festival_name, p.name AS performance_name, p.artist, p.genre
+FROM festivals f, TABLE (f.performance) p;
+
+
+--Other queries
+
+--Festivals with location details and festival_nature details
+--Formatting
+COLUMN festival_name FORMAT A20 WOR
+COLUMN festival_nature FORMAT A20 WOR
+COLUMN target_audience FORMAT A15
+COLUMN location FORMAT A30 WOR
+
+--Query
+SELECT f.festival_name AS festival_name, fn.name AS festival_nature, fn.target_audience, (CONCAT(CONCAT(CONCAT(CONCAT(l.address.street, ', '), l.address.city), ', '), l.address.country)) AS location, l.price
+FROM festivals f JOIN festival_natures fn
+ON f.festival_nature_id = fn.festival_nature_id
+JOIN locations l
+ON f.location_id = l.location_id;
+
+
+--Get location id and total festivals involved in each location
+--This query is displaying the location ids and number of festivals booked in that location
+SELECT location_id, COUNT(festival_nature_id)
+FROM festivals
+GROUP BY location_id
+HAVING COUNT(festival_nature_id)>1
+ORDER BY COUNT(festival_nature_id) ASC;
+
+
+--Query using procedure
+
+--Total number of festivals
+EXEC proc_count_festivals;
+
+
+--Query festival details using festival name
+EXEC proc_festival_detail('BHAGAVATA');
+EXEC proc_festival_detail('SCREAM FEST');
+EXEC proc_festival_detail('PHOENIX FESTIVAL');
+EXEC proc_festival_detail('MUSIC FEST');
+EXEC proc_festival_detail('DANCE FEST');
+EXEC proc_festival_detail('&festival_name');
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+	
+--------------------- FESTIVAL_STAFF TABLE ------------------
+
+--Query the whole table
+
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+
+--Other queries
+
+--Festival_staff with location details and festival_nature details along with staff details
+--Formatting
+COLUMN festival_nature FORMAT A20 WOR
+COLUMN staff FORMAT A20 WOR
+COLUMN location FORMAT A40 WOR
+
+--Query
+SELECT fs.festival_staff_id, CONCAT(CONCAT(s.firstname, ' '),  s.lastname) AS staff, fn.name AS festival_nature, CONCAT(CONCAT(CONCAT(CONCAT(l.address.street, ', '), l.address.city), ', '), l.address.country) AS location
+FROM festival_staff fs JOIN festivals f
+ON fs.festival_nature_id = f.festival_nature_id
+JOIN festival_natures fn
+ON fn.festival_nature_id = f.festival_nature_id
+JOIN locations l
+ON f.location_id = l.location_id
+JOIN staff s
+ON s.staff_id = fs.staff_id
+ORDER BY fs.festival_staff_id;
+
+
+--Query using left join with staff
+SELECT s.staff_id, CONCAT(CONCAT(s.firstname, ' '),  s.lastname) AS staff, fs.staff_id AS FS_staff_id, fs.festival_staff_id, fs.festival_nature_id, fs.location_id 
+FROM staff s 
+LEFT JOIN festival_staff fs
+ON fs.staff_id = s.staff_id;
+
+
+--Same query using right join (Should display same result)
+SELECT s.staff_id, CONCAT(CONCAT(s.firstname, ' '),  s.lastname) AS staff, fs.staff_id AS FS_staff_id, fs.festival_staff_id, fs.festival_nature_id, fs.location_id 
+FROM festival_staff fs 
+RIGHT JOIN staff s
+ON fs.staff_id = s.staff_id;
+
+
+--Get staff id and total festivals staff is involved with in each location
+--This query returns only the records of staff except the staff with id 2
+SELECT staff_id, COUNT(festival_staff_id)
+FROM festival_staff
+GROUP BY staff_id
+HAVING staff_id != 2;
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+

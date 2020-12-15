@@ -1,0 +1,131 @@
+
+
+/*
+
+	CONSTRAINT FILE
+		-Contains commands for creating constraints 
+		-Adds pk, fk, and other constraints to tables
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+
+--@D:\Database_Assignment_II\script\constraint_4.txt
+
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+
+--------------------------------------------STAFF TABLE-------------------------------------------------
+
+--Staff table and constraints
+ALTER TABLE staff
+ADD CONSTRAINT pk_staff
+PRIMARY KEY (staff_id);
+
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_gender
+CHECK (gender IN('M', 'F'));
+
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_firstname
+CHECK (firstname= UPPER(firstname));
+
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_lastname
+CHECK (lastname= UPPER(lastname));
+
+ALTER TABLE staff
+ADD CONSTRAINT fk_s_staff
+FOREIGN KEY (leader)
+REFERENCES staff(staff_id);
+
+
+
+--------------------------------------------FESTIVAL_NATURES TABLE-------------------------------------------------
+
+--festival_natures table and the constraints
+ALTER TABLE festival_natures 
+ADD CONSTRAINT pk_festival_natures
+PRIMARY KEY (festival_nature_id);
+
+ALTER TABLE festival_natures 
+ADD CONSTRAINT ck_festival_natures_name
+CHECK (name= UPPER(name));
+
+ALTER TABLE festival_natures 
+ADD CONSTRAINT ck_festival_natures_target_audience
+CHECK (target_audience= UPPER(target_audience));
+
+
+
+--------------------------------------------LOCATIONS-------------------------------------------------
+
+
+--locations table and the constraints
+ALTER TABLE locations
+ADD CONSTRAINT pk_locations
+PRIMARY KEY (location_id);
+
+
+
+
+--------------------------------------------FESTIVALS TABLE-------------------------------------------------
+
+
+--festivals table and the constraints
+ALTER TABLE festivals
+ADD CONSTRAINT pk_festivals
+PRIMARY KEY (festival_nature_id, location_id);
+
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_festival_natures
+FOREIGN KEY (festival_nature_id)
+REFERENCES festival_natures(festival_nature_id);
+
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_locations
+FOREIGN KEY (location_id)
+REFERENCES locations(location_id);
+
+ALTER TABLE festivals
+ADD CONSTRAINT ck_festivals_festival_name
+CHECK (festival_name = UPPER(festival_name));
+
+
+
+--------------------------------------------FESTIVAL_STAFF TABLE-------------------------------------------------
+
+--festival_staff table and the constraints
+ALTER TABLE festival_staff
+ADD CONSTRAINT pk_festival_staff
+PRIMARY KEY (festival_staff_id);
+
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_festivals
+FOREIGN KEY (festival_nature_id, location_id)
+REFERENCES festivals(festival_nature_id, location_id);
+
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_staff
+FOREIGN KEY (staff_id)
+REFERENCES staff(staff_id);
+
+
+--------------------------------------------VIEW-------------------------------------------------
+
+
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name NOT LIKE 'SYS%';
+
+
+

@@ -1,0 +1,207 @@
+
+/*
+
+
+	DROP TEST FILE
+		-Contains the tests for drops
+		-Checks whether drop commands from the drop script file remove all the intended objects
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+
+--@D:\Database_Assignment_II\script\drop_test_4.txt
+
+
+--------------------------------------------DROPPING CONSTRAINTS-------------------------------------------------
+
+
+-------------------------------------------- DROPPING FOREIGN KEYS-------------------------------------------------
+
+-- TEST
+--View constraints
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'FK%';
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL FOREIGN KEYS------------
+
+--EXPECTED OUTPUT
+-- 5 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 5 ROWS SELECTED
+
+--------- AFTER DROPPING ALL FOREIGN KEYS------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+
+
+
+
+
+-------------------------------------------- DROPPING PRIMARY KEYS-------------------------------------------------
+
+-- TEST
+--View constraints
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'PK%';
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL PRIMARY KEYS------------
+
+--EXPECTED OUTPUT
+-- 5 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 5 ROWS SELECTED
+
+--------- AFTER DROPPING ALL PRIMARY KEYS------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+
+
+
+
+-------------------------------------------- DROPPING CHECK CONSTRAINTS-------------------------------------------------
+
+-- TEST
+--View constraints
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name LIKE 'CK%';
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL CHECK CONSTRAINTS ------------
+
+--EXPECTED OUTPUT
+-- 5 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 5 ROWS SELECTED
+
+--------- AFTER DROPPING ALL CHECK CONSTRAINTS ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+
+
+
+
+-------------------------------------------- DROPPING TABLES -------------------------------------------------
+
+-- TEST
+--View ALL TABLES
+COLUMN tname FORMAT A30;
+SELECT * FROM TAB;
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL TABLES ------------
+
+--EXPECTED OUTPUT
+-- 7 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 7 ROWS SELECTED
+
+--------- AFTER DROPPING ALL TYPES ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+
+
+-------------------------------------------- DROPPING TYPES -------------------------------------------------
+
+-- TEST
+--View Object TYPES
+COLUMN object_name FORMAT A30;
+COLUMN object_type FORMAT A12;
+SELECT object_name, object_type FROM user_objects
+WHERE object_type = 'TYPE';
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL TYPES ------------
+
+--EXPECTED OUTPUT
+-- 5 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 5 ROWS SELECTED
+
+--------- AFTER DROPPING ALL TYPES ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+
+
+
+
+-------------------------------------------- DROPPING SEQUENCE -------------------------------------------------
+
+-- TEST
+--View SEQUENCE
+COLUMN sequence_name FORMAT A30;
+SELECT sequence_name FROM user_sequences;
+
+
+
+--------------------------------- TEST RESULT--------------------------------
+
+--------- BEFORE DROPPING ALL SEQUENCE ------------
+
+--EXPECTED OUTPUT
+-- 4 ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- 4 ROWS SELECTED
+
+--------- AFTER DROPPING ALL SEQUENCE ------------
+
+--EXPECTED OUTPUT
+-- NO ROWS SELECTED
+
+-- ACTUAL OUTPUT 
+-- NO ROWS SELECTED
+
+

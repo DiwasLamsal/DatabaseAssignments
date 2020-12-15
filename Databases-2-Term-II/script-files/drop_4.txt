@@ -1,0 +1,147 @@
+/*
+
+
+	DROP FILE
+		-Contains commands for dropping all the constraints and tables
+		-The drops are ordered such that integrity violation does not occur
+		-First the foreign key constraints are dropped, then primary key and check constraints followed by table drops
+		 After the table drops, the types and sequences are dropped.
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+--@D:\Database_Assignment_II\script\drop_4.txt
+
+
+--Display dbms output
+SET SERVEROUTPUT ON
+
+--------------------------------------------CONSTRAINTS-------------------------------------------------
+
+
+--------------------------------------------FOREIGN KEYS-------------------------------------------------
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT fk_fs_festivals;
+
+ALTER TABLE festivals
+DROP CONSTRAINT fk_f_locations;
+
+ALTER TABLE festivals
+DROP CONSTRAINT fk_f_festival_natures;
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT fk_fs_staff;
+
+ALTER TABLE staff
+DROP CONSTRAINT fk_s_staff;
+
+
+--------------------------------------------PRIMARY KEYS-------------------------------------------------
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT pk_festival_staff;
+
+ALTER TABLE festivals
+DROP CONSTRAINT pk_festivals;
+
+ALTER TABLE locations
+DROP CONSTRAINT pk_locations;
+
+ALTER TABLE festival_natures
+DROP CONSTRAINT pk_festival_natures;
+
+ALTER TABLE staff
+DROP CONSTRAINT pk_staff;
+
+
+--------------------------------------------CHECK-------------------------------------------------
+
+--Staff table
+ALTER TABLE staff
+DROP CONSTRAINT ck_staff_gender;
+
+ALTER TABLE staff
+DROP CONSTRAINT ck_staff_firstname;
+
+ALTER TABLE staff
+DROP CONSTRAINT ck_staff_lastname;
+
+
+--Festival_natures table
+ALTER TABLE festival_natures 
+DROP CONSTRAINT ck_festival_natures_name;
+
+
+--Festivals table
+ALTER TABLE festivals
+DROP CONSTRAINT ck_festivals_festival_name;
+
+
+--------------------------------------------TABLES-------------------------------------------------
+
+--Drop child tables
+DROP TABLE festival_staff;
+DROP TABLE festivals;
+
+--Drop parent tables
+DROP TABLE locations;
+DROP TABLE festival_natures;
+DROP TABLE staff;
+
+
+
+--------------------------------------------TYPES-------------------------------------------------
+
+
+DROP TYPE performance_table_type;
+DROP TYPE performance_type;
+
+DROP TYPE contact_detail_varray_type;
+DROP TYPE contact_detail_type;
+
+DROP TABLE addresses;
+DROP TYPE address_type;
+
+
+--------------------------------------------SEQUENCES-------------------------------------------------
+
+--Drop sequences
+DROP SEQUENCE seq_staff_id;
+DROP SEQUENCE seq_festival_nature_id;
+DROP SEQUENCE seq_location_id;
+DROP SEQUENCE seq_festival_staff_id;
+
+
+
+PURGE RECYCLEBIN;
+
+--------------------------------------------VIEW-------------------------------------------------
+
+--View objects
+COLUMN object_name FORMAT A30;
+COLUMN object_type FORMAT A12;
+SELECT object_name, object_type FROM user_objects
+WHERE object_type = 'TYPE';
+
+--View tables
+COLUMN tname FORMAT A30;
+SELECT * FROM TAB;
+
+--View Sequences
+COLUMN sequence_name FORMAT A30;
+SELECT sequence_name FROM user_sequences;
+
+
+--View constraints
+COLUMN constraint_name FORMAT A30;
+SELECT constraint_name FROM user_constraints
+WHERE constraint_name NOT LIKE 'SYS%';
+
+

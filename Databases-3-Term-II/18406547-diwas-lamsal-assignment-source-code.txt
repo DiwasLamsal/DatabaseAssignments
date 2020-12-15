@@ -1,0 +1,326 @@
+-- Load the JSON EPL dataset 
+
+-https://stackoverflow.com/questions/58150528/mongodb-atlas-mongoimport-issues-cannot-decode-array-into-a-d - daydreamer (jsonArray)
+mongoimport --db=epldb --collection=eplcollection --file=D:/database/epl.json --jsonArray
+
+
+
+------------------------------------------------------------------------------------------------------
+/*
+	First keep the variables ready to use
+*/
+> show dbs
+> use epldb
+> show collections
+> epl = db.eplcollection;
+
+--Confirm that everything has been imported correctly.
+> epl.find().pretty();
+
+
+------------------------------------------------------------------------------------------------------
+1.
+/*
+	Show all the EPL teams involved in the season.
+*/
+
+--Aggregation pipeline referred to mongodb documentation $group and Array operation $addToSet
+-- $addToSet was used to add unique elements to array so that both home and away teams are added
+-- in the same array to be displayed later.
+-- https://docs.mongodb.com/manual/reference/operator/update/addToSet/
+epl.aggregate([
+    {
+       $group:
+       {
+          _id:0,
+          Team: {$addToSet: '$HomeTeam'},
+          Team: {$addToSet: '$AwayTeam'}
+    }}
+ ]).pretty();
+ 
+ /*
+	Ans:
+		{
+        "_id" : 0,
+        "Team" : [
+                "Watford",
+                "Crystal Palace",
+                "Cardiff",
+                "Tottenham",
+                "Huddersfield",
+                "Brighton",
+                "Southampton",
+                "Fulham",
+                "Burnley",
+                "Bournemouth",
+                "Chelsea",
+                "Wolves",
+                "Everton",
+                "Man United",
+                "Liverpool",
+                "Man City",
+                "Newcastle",
+                "West Ham",
+                "Leicester",
+                "Arsenal"
+        ]
+}
+ 
+ */
+
+
+------------------------------------------------------------------------------------------------------
+
+2.
+/*
+	How many matches were played on Mondays?
+*/
+
+
+-- Needed a lot of research about date from string before applying date of week 
+-- https://docs.mongodb.com/manual/reference/operator/aggregation/dateFromString/ 
+-- The index 2 is used for Monday in the $dateOfWeek
+-- https://docs.mongodb.com/manual/reference/operator/aggregation/dayOfWeek/
+-- $match is used to match the records where the day of week is 2
+-- $count is used to count the total number of returned records
+
+epl.aggregate( [
+{
+	"$project" : {
+		"dofweek" : {
+			"$dayOfWeek" : { 
+				"$dateFromString" : { 
+					"dateString": "$Date",
+					"format": "%d/%m/%Y"
+				}
+			}
+		}
+	}
+},
+{"$match": {"dofweek": 2}},
+{"$count":"Number of Matches on Monday"}
+]);
+
+--Ans: { "Number of Matches on Monday" : 17 }
+
+
+------------------------------------------------------------------------------------------------------
+
+3.
+/*
+	Display the total number of goals “Liverpool” had scored and conceded in the season. 
+*/
+
+
+-- This question required a lot of research too
+-- The aggregation pipeline $match, $project and $group were used
+-- The $cond was used to check whether the HomeTeam or AwayTeam is Liverpool 
+-- To set the number of goals accordingly
+
+epl.aggregate({
+$match: {$or : [ 
+			{"HomeTeam" : "Liverpool"},
+			{"AwayTeam" : "Liverpool"}
+		]
+	}
+},
+{"$project" : {
+		_id: 0,
+		Team: "Liverpool",
+		"HomeTeam": 1,
+		"AwayTeam": 1,
+		Goals_For: {$cond: [{
+			$eq: ['$HomeTeam', 'Liverpool']}, '$FTHG', '$FTAG']
+		},
+		Goals_Against: {$cond: [{
+			$eq: ['$AwayTeam', 'Liverpool']}, '$FTHG', '$FTAG']
+		}
+	}
+},
+{$group: {
+		_id: "$Team",
+		Goals_For: {$sum: '$Goals_For'},
+		Goals_Against: {$sum: '$Goals_Against'}
+	}
+});
+
+--Ans: { "_id" : "Liverpool", "Goals_For" : 89, "Goals_Against" : 22 }
+
+
+
+------------------------------------------------------------------------------------------------------
+
+4.
+/*
+	Who refereed the most matches? 
+*/
+
+--Aggregation pipeline referred to mongodb documentation $group, $sum, $sort, $limit
+
+epl.aggregate( [
+  {
+    $group: {
+        _id : "$Referee",
+       matches_refereed: { $sum: 1 }
+    }
+  },
+  { $sort: { matches_refereed: -1 } },
+  { $limit : 1 }
+] )
+
+--Ans: { "_id" : "A Taylor", "matches_refereed" : 32 } - Interpreted as A Taylor with 32 matches refereed
+
+
+------------------------------------------------------------------------------------------------------
+
+5.
+/*
+	Display all the matches that “Man United” lost. 
+*/
+
+-- This question does not require aggregation and can be solved using AND OR operators 
+-- If the HomeTeam is Man United and the Result (FTR) goes to Away team (A), Man United lost the match
+-- If the AwayTeam is Man United and the Result (FTR) goes to Home team (H), Man United lost the match
+--Without projection
+epl.find(
+	{
+		$or : [
+               { 
+                 $and : [ 
+                         {"HomeTeam" : "Man United"},
+                         {"FTR" : "A"}
+                       ]
+               },
+               { 
+                 $and : [ 
+                         {"AwayTeam" : "Man United"},
+                         {"FTR" : "H"}
+                       ]
+               }
+             ]
+	}
+).pretty()
+
+--With projection
+epl.find(
+{
+$or : [
+   { 
+	 $and : [ 
+			 {"HomeTeam" : "Man United"},
+			 {"FTR" : "A"}
+		   ]
+   },
+   { 
+	 $and : [ 
+			 {"AwayTeam" : "Man United"},
+			 {"FTR" : "H"}
+		   ]
+   }
+	 ]
+},
+{
+	HomeTeam: 1, AwayTeam: 1, FTR: 1, _id: 0
+}	
+).pretty()
+
+/*
+
+	Ans:
+		{ "HomeTeam" : "Brighton", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Man United", "AwayTeam" : "Tottenham", "FTR" : "A" }
+		{ "HomeTeam" : "West Ham", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Man City", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Liverpool", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Arsenal", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Wolves", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Everton", "AwayTeam" : "Man United", "FTR" : "H" }
+		{ "HomeTeam" : "Man United", "AwayTeam" : "Man City", "FTR" : "A" }
+		{ "HomeTeam" : "Man United", "AwayTeam" : "Cardiff", "FTR" : "A" }
+		
+*/
+
+
+------------------------------------------------------------------------------------------------------
+
+6.
+/*
+	Write a query to display the final ranking of all the teams based on their total points. 
+*/
+
+
+-- This was by far the most time consuming question attempted as part of the assignment.
+-- The thought was to implement a similar technique to what was done on Neo4j, however, an interesting thought
+-- came up about adding the teams to array and allocating points according to game results (3 for win and 1 for draw)
+-- The array could later be deconstructed using $unwind. This would follow with grouping the teams by summing their points for
+-- The match in the current index of collection. 
+
+-- https://docs.mongodb.com/manual/reference/operator/aggregation/switch/
+-- https://docs.mongodb.com/manual/reference/operator/aggregation/unwind/
+
+
+epl.aggregate([{
+$project:
+  {
+	_id: 0,
+	Team: { 
+		$switch:
+		{
+		  branches: [
+			{
+			  case: { $eq : [ '$FTR', 'H' ] },
+			  then: ['$HomeTeam']
+			},
+			{
+			  case: { $eq : [ '$FTR', 'A' ] },
+			  then: ['$AwayTeam']
+			},
+			{
+			  case: { $eq : [ '$FTR', 'D' ] },
+			  then: ['$HomeTeam', '$AwayTeam']
+			}
+		  ],
+		  default: 0
+		}
+	},
+	points: {$cond: [{$eq: ['$FTR', 'D']}, 1, 3]}
+  }
+},{"$unwind": "$Team"},
+{$group: {
+		_id: "$Team",
+		total_points_by_team: {$sum: '$points'},
+	}
+},
+{ $sort: { total_points_by_team: -1 } }
+])
+
+
+/*
+
+	Ans:
+		{ "_id" : "Man City", "total_points_by_team" : 98 }
+		{ "_id" : "Liverpool", "total_points_by_team" : 97 }
+		{ "_id" : "Chelsea", "total_points_by_team" : 72 }
+		{ "_id" : "Tottenham", "total_points_by_team" : 71 }
+		{ "_id" : "Arsenal", "total_points_by_team" : 70 }
+		{ "_id" : "Man United", "total_points_by_team" : 66 }
+		{ "_id" : "Wolves", "total_points_by_team" : 57 }
+		{ "_id" : "Everton", "total_points_by_team" : 54 }
+		{ "_id" : "West Ham", "total_points_by_team" : 52 }
+		{ "_id" : "Leicester", "total_points_by_team" : 52 }
+		{ "_id" : "Watford", "total_points_by_team" : 50 }
+		{ "_id" : "Crystal Palace", "total_points_by_team" : 49 }
+		{ "_id" : "Bournemouth", "total_points_by_team" : 45 }
+		{ "_id" : "Newcastle", "total_points_by_team" : 45 }
+		{ "_id" : "Burnley", "total_points_by_team" : 40 }
+		{ "_id" : "Southampton", "total_points_by_team" : 39 }
+		{ "_id" : "Brighton", "total_points_by_team" : 36 }
+		{ "_id" : "Cardiff", "total_points_by_team" : 34 }
+		{ "_id" : "Fulham", "total_points_by_team" : 26 }
+		{ "_id" : "Huddersfield", "total_points_by_team" : 16 }
+		
+*/
+
+
+
+------------------------------------------------------------------------------------------------------

@@ -1,0 +1,417 @@
+
+/*
+
+	PROC TEST FILE
+		-Contains the tests for procedures
+		-Tests all the procedures used (separate tests for cursor using procedures)
+	
+	GROUP 4
+		
+		18406547 - Diwas Lamsal
+		18406498 - Bhuwan Khatiwada           
+		18413710 - Sandip Kumar Subba
+		18413644 - Bishownath Dhakal
+		
+*/
+
+--@D:\Database_Assignment_II\script\proc_test_4.txt
+
+
+---------------------------------------THIS FILE CONTAINS PROCEDURE TESTS---------------------------------------
+ 
+SET SERVEROUTPUT ON
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_INSERT_ADDRESSES ------------------
+						 
+--Expected outcomes after each insert:
+--1 row created.						 
+						 
+--Insert without procedure
+INSERT INTO addresses(street, city, country)
+VALUES ('54 FESTIVE ROAD', 'NORTHAMPTON', 'UK');
+
+--Expected outcomes after each inser:
+--PL/SQL procedure successfully completed, and the data appears when querying
+
+--Insert using procedure
+EXEC proc_insert_addresses('111 BAY STATE ROAD', 'BOSTON', 'USA');
+
+--Verify Two rows of data inserted
+SELECT street, city, country FROM addresses;
+
+--Expected result:
+--Two rows of data with the same details provided
+
+--Delete test data
+DELETE FROM addresses WHERE street = '54 FESTIVE ROAD';
+DELETE FROM addresses WHERE street = '111 BAY STATE ROAD';
+
+--Verify Two rows of data deleted
+SELECT street, city, country FROM addresses;
+
+--Rows found: 0
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_INSERT_STAFF ------------------
+
+--Verify empty table
+SELECT staff_id, firstname, lastname, leader FROM staff;
+
+--Expected outcomes after each insert:
+--1 row created.						 
+
+--Insert without procedure
+INSERT INTO staff (staff_id, firstname, lastname, gender, contact, current_address, permanent_address, email, leader, salary)
+VALUES (seq_staff_id.NEXTVAL, 'RAMESH', 'THAPA', 'M', contact_detail_varray_type(contact_detail_type('9808123457', 'MOBILE'), 
+																			     contact_detail_type('01-4216354', 'LANDLINE'))
+																	, address_type('7500 IMPERIAL BLVD', 'LOS ANGELES', 'USA')
+																	, address_type('333 SAN JUAN BLVD', 'SAN JUAN', 'PUERTO RICO')
+																	, 'RAMESHTHAPA@GMAIL.COM', seq_staff_id.CURRVAL, 12990);
+
+
+				
+--Expected outcomes after each insert:
+--PL/SQL procedure successfully completed, and the data appears when querying
+
+--Insert with procedure
+EXEC proc_insert_staff('DIANE', 'BROWN', 'F', '(617)342-23442', 'LANDLINE', '981513244', 'MOBILE', '4242 MISTY LANE', 'SEATTLE', 'USA', 'KUNGSGATAN 56', 'STOCKHOLM', 'SWEDEN', 'DIANE_BROWN@HOTMAIL.COM', 1, 5000);
+
+--Verify Two rows of data inserted
+SELECT staff_id, firstname, lastname, leader FROM staff;
+
+--Result: Two rows of data with provided details are inserted
+
+--Delete test data
+DELETE FROM staff;
+
+--Reset Sequence for staff
+EXEC proc_reset_seq('seq_staff_id');
+
+--Verify Sequence Currval
+SELECT seq_staff_id.CURRVAL FROM DUAL;
+
+--Verify empty table
+SELECT staff_id, firstname, lastname, leader FROM staff;
+
+--Rows found: 0
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_INSERT_FESTIVAL_NATURES ------------------
+
+--Verify empty table
+SELECT * FROM festival_natures;
+
+--Expected outcomes after each insert:
+--1 row created.						 
+
+--Insert without procedure
+INSERT INTO festival_natures (festival_nature_id,name,target_audience)
+VALUES (seq_festival_nature_id.NEXTVAL, 'PURAN', 'OLD');
+
+--Expected outcomes after each insert:
+--PL/SQL procedure successfully completed, and the data appears when querying
+
+--Insert using procedure
+EXEC proc_insert_festival_natures('CONCERT', 'YOUTH');
+
+--Verify insert
+SELECT * FROM festival_natures;
+
+--Result: Inserted data appears when querying
+
+--Delete test data
+DELETE FROM festival_natures;
+
+--Reset Sequence for festival_natures
+EXEC proc_reset_seq('seq_festival_nature_id');
+
+--Verify Sequence Currval
+SELECT seq_festival_nature_id.CURRVAL FROM DUAL;
+
+--Verify empty table
+SELECT * FROM festival_natures;
+
+--Rows found: 0
+----------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ 
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_INSERT_LOCATIONS ------------------
+  
+--Note: Data is necessary in addresses table in order to test this procedure
+  
+--Verify empty table
+SELECT location_id, capacity, price, l.address.street, l.address.city, l.address.country FROM locations l;
+
+--Requires reference of addresses table
+
+--Insert without procedure
+INSERT INTO locations (location_id,capacity,price,address)
+SELECT seq_location_id.NEXTVAL, 1500, 10000, REF(a)
+FROM addresses a
+WHERE a.street = '111 VALLEY WAY';
+
+--Insert with procedure
+EXEC proc_insert_locations(1200, 20500, '177 AIRPORT ROAD');
+
+--Verify insert
+SELECT location_id, capacity, price, l.address.street AS street, l.address.city  AS city, l.address.country  AS country FROM locations l ORDER BY location_id;
+
+--Result: Inserted data appears when querying
+
+--Delete test data
+DELETE FROM locations;
+
+--Reset Sequence for locations
+EXEC proc_reset_seq('seq_location_id');
+
+--Verify Sequence Currval
+SELECT seq_location_id.CURRVAL FROM DUAL;
+
+--Verify empty table
+SELECT location_id, capacity, price, l.address.street, l.address.city, l.address.country FROM locations l;
+
+--Rows found: 0
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+------------------------ TEST PROC_INSERT_FESTIVALS ---------------------
+
+--Note: Data is necessary in locations and festival_natures table in order to test this procedure
+  
+--Verify empty table
+SELECT festival_nature_id, location_id, festival_name FROM festivals;
+
+--Insert without procedure
+INSERT INTO festivals (festival_nature_id, location_id, festival_name, performance)
+VALUES (1, 1, 'BHAGAVATA', performance_table_type(performance_type('PRAWACHAN', 'GURU ARBINDRA NATH', 'RELIGIOUS'),
+												  performance_type('PRAWACHAN', 'GURU ANUBHAVAM ACHARYA', 'RELIGIOUS')));
+
+
+--Insert with procedure
+EXEC proc_insert_festivals(2, 3, 'SCREAM FEST', 'SINGING', 'NEPATHYA', 'ROCK', 'MUSIC', 'ANTIM GRAHAN', 'METAL');
+
+--Verify insert
+SELECT festival_nature_id, location_id, festival_name FROM festivals;
+
+--Result: Inserted data appears when querying
+
+--Delete test data
+DELETE FROM festivals;
+
+--Verify empty table
+SELECT festival_nature_id, location_id, festival_name FROM festivals;
+
+--Rows found: 0
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_INSERT_FESTIVAL_STAFF ------------------
+
+--Note*: Data is necessary in festivals and staff table in order to test this procedure
+  
+--Verify empty table
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+--Insert without procedure
+INSERT INTO festival_staff (festival_staff_id,staff_id,festival_nature_id,location_id)
+VALUES (seq_festival_staff_id.NEXTVAL, 1, 2, 3);
+
+--Insert with procedure
+EXEC proc_insert_festival_staff(3, 5, 1);
+
+--Verify insert
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+--Result: Inserted data appears when querying
+
+--Delete test data
+DELETE FROM festivals;
+
+--Reset Sequence for festival_staff
+EXEC proc_reset_seq('seq_festival_staff_id');
+
+--Verify Sequence Currval
+SELECT seq_festival_staff_id.CURRVAL FROM DUAL;
+
+
+--Verify empty table
+SELECT festival_staff_id, festival_nature_id, location_id, staff_id FROM festival_staff;
+
+--Rows found: 0
+----------------------------------------------------------------------------------------------------------------------------
+  
+   
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_RESET_SEQ ------------------
+
+--Increment the sequence position
+SELECT seq_festival_staff_id.NEXTVAL FROM DUAL;
+SELECT seq_festival_staff_id.NEXTVAL FROM DUAL;
+SELECT seq_festival_staff_id.NEXTVAL FROM DUAL;
+
+--Reset Sequence for festival_staff
+EXEC proc_reset_seq('seq_festival_staff_id');
+
+--Verify Sequence Currval
+SELECT seq_festival_staff_id.CURRVAL FROM DUAL;
+
+--Expected output: 0
+--Result: 0
+	
+----------------------------------------------------------------------------------------------------------------------------
+ 
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- Test procedures that display count  ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing these procedures
+
+--Also testing the functions that these procedures use together
+--Total number of staff
+EXEC proc_count_staff;
+
+--Using actual query
+SELECT COUNT(staff_id) FROM staff;
+
+--Expected : Shows total number of staff
+--Result   : Shows total number of staff
+
+-------------------------------------------------------------
+
+--Total number of festivals
+EXEC proc_count_festivals;
+
+--Using actual query
+SELECT COUNT(festival_id) FROM festivals;
+
+--Expected : Shows total number of festivals
+--Result   : Shows total number of festivals
+
+-------------------------------------------------------------
+
+--Highest price of location
+EXEC proc_exp_location;
+
+--Using actual query
+SELECT MAX(price) FROM locations;
+
+--Expected : Shows highest price for any location
+--Result   : Shows highest price for any location
+
+-------------------------------------------------------------
+
+--Least price of location
+EXEC proc_chp_location;
+
+--Using actual query
+SELECT MIN(price) FROM locations;
+
+--Expected : Shows lowest price for any location
+--Result   : Shows lowest price for any location
+
+-------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_COUNT_STAFF_SALARY ------------------
+
+--BOUND CHECKING
+
+--Below lower bound
+EXEC proc_count_staff_salary(-1);
+--Expected : Procedure Works and total number of staff displayed
+--Result   : Procedure Works and total number of staff displayed
+
+--Minimum value
+EXEC proc_count_staff_salary(0);
+--Expected : Procedure Works and total number of staff displayed
+--Result   : Procedure Works and total number of staff displayed
+
+--Medium value	
+EXEC proc_count_staff_salary(9000);
+--Expected : Procedure Works and total number of staff with salary above 9000 displayed
+--Result   : Procedure Works and total number of staff with salary above 9000 displayed
+
+--Maximum value
+EXEC proc_count_staff_salary(99999999.99);
+--Expected : Procedure Works and no staff with salary higher than 99999999.99 message displayed
+--Result   : Procedure Works and no staff with salary higher than 99999999.99 message displayed
+
+--Exceed upper bound
+EXEC proc_count_staff_salary(1000000000);
+--Expected : Procedure Works and no staff with salary higher than 1000000000 message displayed
+--Result   : Procedure Works and no staff with salary higher than 1000000000 message displayed
+
+
+--Using query to test medium value (to compare with output from procedure)
+SELECT COUNT(staff_id) FROM staff WHERE salary > 9000;
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_STAFF_FIRSTNAME ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_staff_firstname(1);
+
+--Expected : Procedure displays the firstname of provided staff one character per line
+--Result   : Procedure displays the firstname of provided staff one character per line
+----------------------------------------------------------------------------------------------------------------------------
+
+
+--------------------- TEST PROC_STAFF_SURNAME ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_staff_surname(1);
+
+--Expected : Procedure displays the lastname of provided staff one character per line
+--Result   : Procedure displays the lastname of provided staff one character per line
+----------------------------------------------------------------------------------------------------------------------------
+
+
+--------------------- TEST PROC_LOCATION_CAPACITY_CK ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_location_capacity_ck(3, 49);
+
+--Expected : Procedure displays total number of groups that can fit in the provided location
+--Result   : Procedure displays total number of groups that can fit in the provided location
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_USERNAME_PASSWORD ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_username_password(2);
+
+--Expected : Generated username and password combination is displayed
+--Result   : Generated username and password combination is displayed
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_FESTIVAL_DETAIL ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_festival_detail('BHAGAVATA');
+EXEC proc_festival_detail('BHAGAVATAMA');
+
+--Expected : Details of provided festival displayed. If no festival found, an error message is displayed (ERROR HANDLING)
+--Result   : Details of provided festival displayed. If no festival found, an error message is displayed, i.e. for BHAGAVATAMA 
+
+
+----------------------------------------------------------------------------------------------------------------------------
+--------------------- TEST PROC_SHOW_STAFF_ADDRESS ------------------
+--Note*: Execute the insert_4.txt SQL commands before testing this procedure
+EXEC proc_show_staff_address(1);
+EXEC proc_show_staff_address(99);
+
+--Expected : Details of provided staff displayed. If no staff found, an error message is displayed (ERROR HANDLING)
+--Result   : Details of provided staff displayed. If no staff found, an error message is displayed, i.e. for 99
+
+
+----------------------------------------------------------------------------------------------------------------------------

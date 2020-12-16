@@ -1,5 +1,5 @@
 
-<div align = "right"><font size = "5"> <b>Welcome to my GitHub</b> </font></div><br>
+<div align = "right"><font size = "4"> <b>Welcome to my GitHub</b> </font></div><br>
 <div align = "right"><a href = "https://diwaslamsal.github.io/DiwasLamsal"> Home </a> | <a href = "https://github.com/diwaslamsal/DatabaseAssignments"> Project Home </a></div>
 
 ### Part 1 - Learning Diary Including Lab Exercises and Reflection. 

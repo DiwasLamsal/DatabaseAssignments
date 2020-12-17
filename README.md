@@ -3,7 +3,7 @@
 <div align = "right"><a href = "https://diwaslamsal.github.io/DiwasLamsal"> Home </a> | <a href = "https://github.com/diwaslamsal/DatabaseAssignments"> Project Home </a></div>
 
 ### Part 1 - Learning Diary Including Lab Exercises and Reflection. 
-### Part 2 - Development of a Graph Database for Given EPL Dataset using MongoDB. 
+### Part 2 - Development of a Document-Based Database for Given EPL Dataset using MongoDB. 
 ### Part 3 - Paper on Bigdata analytics and the role of NoSQL databases
 Databases 3 Term II, University of Northampton
 
